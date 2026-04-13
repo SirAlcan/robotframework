@@ -1,0 +1,234 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<robot generator="Robot 7.4.2 (Python 3.14.4 on win32)" generated="2026-04-13T20:51:44.356056" rpa="false" schemaversion="5">
+<suite id="s1" name="PythonProject" source="C:\Users\gkazakou\PycharmProjects\PythonProject">
+<suite id="s1-s1" name="Automation" source="C:\Users\gkazakou\PycharmProjects\PythonProject\Automation">
+<suite id="s1-s1-s1" name="openWebsite" source="C:\Users\gkazakou\PycharmProjects\PythonProject\Automation\openWebsite.robot">
+<test id="s1-s1-s1-t1" name="s1ecosportal" line="16">
+<kw name="s1ecosportal Login code">
+<kw name="Open Browser" owner="SeleniumLibrary">
+<msg time="2026-04-13T20:51:44.636143" level="INFO">Opening browser 'Chrome' to base url 'https://einvoice-demo-portal.s1ecos.gr/Accounts/Login?lang=en'.</msg>
+<arg>${urlPortal}</arg>
+<arg>${Browser}</arg>
+<doc>Opens a new browser instance to the optional ``url``.</doc>
+<status status="PASS" start="2026-04-13T20:51:44.635532" elapsed="3.464842"/>
+</kw>
+<kw name="Maximize Browser Window" owner="SeleniumLibrary">
+<doc>Maximizes current browser window.</doc>
+<status status="PASS" start="2026-04-13T20:51:48.100583" elapsed="0.048694"/>
+</kw>
+<kw name="Set Selenium Implicit Wait" owner="SeleniumLibrary">
+<arg>${time}</arg>
+<doc>Sets the implicit wait value used by Selenium.</doc>
+<status status="PASS" start="2026-04-13T20:51:48.149693" elapsed="0.007563"/>
+</kw>
+<kw name="Input Text" owner="SeleniumLibrary">
+<msg time="2026-04-13T20:51:48.158668" level="INFO">Typing text 'gkazakou@impact.gr' into text field 'name:FormModel.Email'.</msg>
+<arg>name:FormModel.Email</arg>
+<arg>${user1}</arg>
+<doc>Types the given ``text`` into the text field identified by ``locator``.</doc>
+<status status="PASS" start="2026-04-13T20:51:48.157653" elapsed="0.205935"/>
+</kw>
+<kw name="Input Text" owner="SeleniumLibrary">
+<msg time="2026-04-13T20:51:48.364516" level="INFO">Typing text '31101995vatr@G' into text field 'name:FormModel.Password'.</msg>
+<arg>name:FormModel.Password</arg>
+<arg>${pwd1}</arg>
+<doc>Types the given ``text`` into the text field identified by ``locator``.</doc>
+<status status="PASS" start="2026-04-13T20:51:48.363873" elapsed="0.229576"/>
+</kw>
+<kw name="Click Element" owner="SeleniumLibrary">
+<msg time="2026-04-13T20:51:48.596075" level="INFO">Clicking element 'name=Sign In'.</msg>
+<msg time="2026-04-13T20:51:53.442023" level="WARN">Keyword 'Capture Page Screenshot' could not be run on failure: Message: invalid session id; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+Stacktrace:
+	chromedriver!GetHandleVerifier [0x7ff724230295+146d5]
+	chromedriver!GetHandleVerifier [0x7ff724230300+14740]
+	chromedriver!(No symbol) [0x7ff723f9d5b6]
+	chromedriver!(No symbol) [0x7ff723fe8093]
+	chromedriver!(No symbol) [0x7ff72401fe72]
+	chromedriver!(No symbol) [0x7ff72401a0d1]
+	chromedriver!(No symbol) [0x7ff724019383]
+	chromedriver!(No symbol) [0x7ff723f660b5]
+	chromedriver!GetHandleVerifier [0x7ff724545949+329d89]
+	chromedriver!GetHandleVerifier [0x7ff72453fe96+3242d6]
+	chromedriver!GetHandleVerifier [0x7ff724563102+347542]
+	chromedriver!GetHandleVerifier [0x7ff72424d425+31865]
+	chromedriver!GetHandleVerifier [0x7ff72425605c+3a49c]
+	chromedriver!(No symbol) [0x7ff723f64e4a]
+	chromedriver!GetHandleVerifier [0x7ff7246a2118+486558]
+	KERNEL32!BaseThreadInitThunk [0x7ff927c7259d+1d]
+	ntdll!RtlUserThreadStart [0x7ff929f8af78+28]
+</msg>
+<msg time="2026-04-13T20:51:53.445525" level="FAIL">InvalidSessionIdException: Message: invalid session id: session deleted as the browser has closed the connection
+from disconnected: unable to send message to renderer
+  (Session info: chrome=147.0.7727.56); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+Stacktrace:
+	chromedriver!GetHandleVerifier [0x7ff724230295+146d5]
+	chromedriver!GetHandleVerifier [0x7ff724230300+14740]
+	chromedriver!(No symbol) [0x7ff723f9d7cd]
+	chromedriver!(No symbol) [0x7ff723f88e90]
+	chromedriver!(No symbol) [0x7ff723f88dec]
+	chromedriver!(No symbol) [0x7ff723f87649]
+	chromedriver!(No symbol) [0x7ff723f881ff]
+	chromedriver!(No symbol) [0x7ff723fa30d6]
+	chromedriver!(No symbol) [0x7ff723fa3c1b]
+	chromedriver!(No symbol) [0x7ff723fa8875]
+	chromedriver!(No symbol) [0x7ff723fa893f]
+	chromedriver!(No symbol) [0x7ff723ff63ce]
+	chromedriver!(No symbol) [0x7ff723ff6f5c]
+	chromedriver!(No symbol) [0x7ff724047cf7]
+	chromedriver!(No symbol) [0x7ff724044818]
+	chromedriver!(No symbol) [0x7ff723fe9018]
+	chromedriver!(No symbol) [0x7ff723fe9f03]
+	chromedriver!GetHandleVerifier [0x7ff724545949+329d89]
+	chromedriver!GetHandleVerifier [0x7ff72453fe96+3242d6]
+	chromedriver!GetHandleVerifier [0x7ff724563102+347542]
+	chromedriver!GetHandleVerifier [0x7ff72424d425+31865]
+	chromedriver!GetHandleVerifier [0x7ff72425605c+3a49c]
+	chromedriver!GetHandleVerifier [0x7ff724239684+1dac4]
+	chromedriver!GetHandleVerifier [0x7ff724239836+1dc76]
+	chromedriver!GetHandleVerifier [0x7ff72421e347+2787]
+	KERNEL32!BaseThreadInitThunk [0x7ff927c7259d+1d]
+	ntdll!RtlUserThreadStart [0x7ff929f8af78+28]
+</msg>
+<arg>name=Sign In</arg>
+<doc>Click the element identified by ``locator``.</doc>
+<status status="FAIL" start="2026-04-13T20:51:48.594529" elapsed="4.868749">InvalidSessionIdException: Message: invalid session id: session deleted as the browser has closed the connection
+from disconnected: unable to send message to renderer
+  (Session info: chrome=147.0.7727.56); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+Stacktrace:
+	chromedriver!GetHandleVerifier [0x7ff724230295+146d5]
+	chromedriver!GetHandleVerifier [0x7ff724230300+14740]
+	chromedriver!(No symbol) [0x7ff723f9d7cd]
+	chromedriver!(No symbol) [0x7ff723f88e90]
+	chromedriver!(No symbol) [0x7ff723f88dec]
+	chromedriver!(No symbol) [0x7ff723f87649]
+	chromedriver!(No symbol) [0x7ff723f881ff]
+	chromedriver!(No symbol) [0x7ff723fa30d6]
+	chromedriver!(No symbol) [0x7ff723fa3c1b]
+	chromedriver!(No symbol) [0x7ff723fa8875]
+	chromedriver!(No symbol) [0x7ff723fa893f]
+	chromedriver!(No symbol) [0x7ff723ff63ce]
+	chromedriver!(No symbol) [0x7ff723ff6f5c]
+	chromedriver!(No symbol) [0x7ff724047cf7]
+	chromedriver!(No symbol) [0x7ff724044818]
+	chromedriver!(No symbol) [0x7ff723fe9018]
+	chromedriver!(No symbol) [0x7ff723fe9f03]
+	chromedriver!GetHandleVerifier [0x7ff724545949+329d89]
+	chromedriver!GetHandleVerifier [0x7ff72453fe96+3242d6]
+	chromedriver!GetHandleVerifier [0x7ff724563102+347542]
+	chromedriver!GetHandleVerifier [0x7ff72424d425+31865]
+	chromedriver!GetHandleVerifier [0x7ff72425605c+3a49c]
+	chromedriver!GetHandleVerifier [0x7ff724239684+1dac4]
+	chromedriver!GetHandleVerifier [0x7ff724239836+1dc76]
+	chromedriver!GetHandleVerifier [0x7ff72421e347+2787]
+	KERNEL32!BaseThreadInitThunk [0x7ff927c7259d+1d]
+	ntdll!RtlUserThreadStart [0x7ff929f8af78+28]
+</status>
+</kw>
+<status status="FAIL" start="2026-04-13T20:51:44.634644" elapsed="8.829366">InvalidSessionIdException: Message: invalid session id: session deleted as the browser has closed the connection
+from disconnected: unable to send message to renderer
+  (Session info: chrome=147.0.7727.56); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+Stacktrace:
+	chromedriver!GetHandleVerifier [0x7ff724230295+146d5]
+	chromedriver!GetHandleVerifier [0x7ff724230300+14740]
+	chromedriver!(No symbol) [0x7ff723f9d7cd]
+	chromedriver!(No symbol) [0x7ff723f88e90]
+	chromedriver!(No symbol) [0x7ff723f88dec]
+	chromedriver!(No symbol) [0x7ff723f87649]
+	chromedriver!(No symbol) [0x7ff723f881ff]
+	chromedriver!(No symbol) [0x7ff723fa30d6]
+	chromedriver!(No symbol) [0x7ff723fa3c1b]
+	chromedriver!(No symbol) [0x7ff723fa8875]
+	chromedriver!(No symbol) [0x7ff723fa893f]
+	chromedriver!(No symbol) [0x7ff723ff63ce]
+	chromedriver!(No symbol) [0x7ff723ff6f5c]
+	chromedriver!(No symbol) [0x7ff724047cf7]
+	chromedriver!(No symbol) [0x7ff724044818]
+	chromedriver!(No symbol) [0x7ff723fe9018]
+	chromedriver!(No symbol) [0x7ff723fe9f03]
+	chromedriver!GetHandleVerifier [0x7ff724545949+329d89]
+	chromedriver!GetHandleVerifier [0x7ff72453fe96+3242d6]
+	chromedriver!GetHandleVerifier [0x7ff724563102+347542]
+	chromedriver!GetHandleVerifier [0x7ff72424d425+31865]
+	chromedriver!GetHandleVerifier [0x7ff72425605c+3a49c]
+	chromedriver!GetHandleVerifier [0x7ff724239684+1dac4]
+	chromedriver!GetHandleVerifier [0x7ff724239836+1dc76]
+	chromedriver!GetHandleVerifier [0x7ff72421e347+2787]
+	KERNEL32!BaseThreadInitThunk [0x7ff927c7259d+1d]
+	ntdll!RtlUserThreadStart [0x7ff929f8af78+28]
+</status>
+</kw>
+<status status="FAIL" start="2026-04-13T20:51:44.632416" elapsed="8.832090">InvalidSessionIdException: Message: invalid session id: session deleted as the browser has closed the connection
+from disconnected: unable to send message to renderer
+  (Session info: chrome=147.0.7727.56); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+Stacktrace:
+	chromedriver!GetHandleVerifier [0x7ff724230295+146d5]
+	chromedriver!GetHandleVerifier [0x7ff724230300+14740]
+	chromedriver!(No symbol) [0x7ff723f9d7cd]
+	chromedriver!(No symbol) [0x7ff723f88e90]
+	chromedriver!(No symbol) [0x7ff723f88dec]
+	chromedriver!(No symbol) [0x7ff723f87649]
+	chromedriver!(No symbol) [0x7ff723f881ff]
+	chromedriver!(No symbol) [0x7ff723fa30d6]
+	chromedriver!(No symbol) [0x7ff723fa3c1b]
+	chromedriver!(No symbol) [0x7ff723fa8875]
+	chromedriver!(No symbol) [0x7ff723fa893f]
+	chromedriver!(No symbol) [0x7ff723ff63ce]
+	chromedriver!(No symbol) [0x7ff723ff6f5c]
+	chromedriver!(No symbol) [0x7ff724047cf7]
+	chromedriver!(No symbol) [0x7ff724044818]
+	chromedriver!(No symbol) [0x7ff723fe9018]
+	chromedriver!(No symbol) [0x7ff723fe9f03]
+	chromedriver!GetHandleVerifier [0x7ff724545949+329d89]
+	chromedriver!GetHandleVerifier [0x7ff72453fe96+3242d6]
+	chromedriver!GetHandleVerifier [0x7ff724563102+347542]
+	chromedriver!GetHandleVerifier [0x7ff72424d425+31865]
+	chromedriver!GetHandleVerifier [0x7ff72425605c+3a49c]
+	chromedriver!GetHandleVerifier [0x7ff724239684+1dac4]
+	chromedriver!GetHandleVerifier [0x7ff724239836+1dc76]
+	chromedriver!GetHandleVerifier [0x7ff72421e347+2787]
+	KERNEL32!BaseThreadInitThunk [0x7ff927c7259d+1d]
+	ntdll!RtlUserThreadStart [0x7ff929f8af78+28]
+</status>
+</test>
+<doc>testLogin</doc>
+<status status="FAIL" start="2026-04-13T20:51:44.453414" elapsed="9.015052"/>
+</suite>
+<status status="FAIL" start="2026-04-13T20:51:44.448201" elapsed="9.022823"/>
+</suite>
+<status status="FAIL" start="2026-04-13T20:51:44.367354" elapsed="9.105767"/>
+</suite>
+<statistics>
+<total>
+<stat pass="0" fail="1" skip="0">All Tests</stat>
+</total>
+<tag>
+</tag>
+<suite>
+<stat name="PythonProject" id="s1" pass="0" fail="1" skip="0">PythonProject</stat>
+<stat name="Automation" id="s1-s1" pass="0" fail="1" skip="0">PythonProject.Automation</stat>
+<stat name="openWebsite" id="s1-s1-s1" pass="0" fail="1" skip="0">PythonProject.Automation.openWebsite</stat>
+</suite>
+</statistics>
+<errors>
+<msg time="2026-04-13T20:51:53.442023" level="WARN">Keyword 'Capture Page Screenshot' could not be run on failure: Message: invalid session id; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
+Stacktrace:
+	chromedriver!GetHandleVerifier [0x7ff724230295+146d5]
+	chromedriver!GetHandleVerifier [0x7ff724230300+14740]
+	chromedriver!(No symbol) [0x7ff723f9d5b6]
+	chromedriver!(No symbol) [0x7ff723fe8093]
+	chromedriver!(No symbol) [0x7ff72401fe72]
+	chromedriver!(No symbol) [0x7ff72401a0d1]
+	chromedriver!(No symbol) [0x7ff724019383]
+	chromedriver!(No symbol) [0x7ff723f660b5]
+	chromedriver!GetHandleVerifier [0x7ff724545949+329d89]
+	chromedriver!GetHandleVerifier [0x7ff72453fe96+3242d6]
+	chromedriver!GetHandleVerifier [0x7ff724563102+347542]
+	chromedriver!GetHandleVerifier [0x7ff72424d425+31865]
+	chromedriver!GetHandleVerifier [0x7ff72425605c+3a49c]
+	chromedriver!(No symbol) [0x7ff723f64e4a]
+	chromedriver!GetHandleVerifier [0x7ff7246a2118+486558]
+	KERNEL32!BaseThreadInitThunk [0x7ff927c7259d+1d]
+	ntdll!RtlUserThreadStart [0x7ff929f8af78+28]
+</msg>
+</errors>
+</robot>

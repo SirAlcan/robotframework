@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<robot generator="Robot 7.4.2 (Python 3.14.4 on win32)" generated="2026-04-13T21:23:40.814224" rpa="false" schemaversion="5">
+<suite id="s1" name="openWebsite" source="C:\Users\gkazakou\PycharmProjects\PythonProject\automation\openWebsite.robot">
+<test id="s1-t1" name="s1ecosportal" line="20">
+<kw name="Open the url" owner="resource" type="SETUP">
+<kw name="Open Browser" owner="SeleniumLibrary">
+<msg time="2026-04-13T21:23:41.091308" level="INFO">Opening browser 'Chrome' to base url 'https://einvoice-demo-portal.s1ecos.gr/Accounts/Login?lang=en'.</msg>
+<arg>${urlPortal}</arg>
+<arg>${Browser}</arg>
+<doc>Opens a new browser instance to the optional ``url``.</doc>
+<status status="PASS" start="2026-04-13T21:23:41.091132" elapsed="3.559571"/>
+</kw>
+<status status="PASS" start="2026-04-13T21:23:41.090683" elapsed="3.560249"/>
+</kw>
+<kw name="s1ecosportal Login code">
+<kw name="Maximize Browser Window" owner="SeleniumLibrary">
+<doc>Maximizes current browser window.</doc>
+<status status="PASS" start="2026-04-13T21:23:44.652056" elapsed="0.055821"/>
+</kw>
+<kw name="Set Selenium Implicit Wait" owner="SeleniumLibrary">
+<arg>${time}</arg>
+<doc>Sets the implicit wait value used by Selenium.</doc>
+<status status="PASS" start="2026-04-13T21:23:44.708023" elapsed="0.004303"/>
+</kw>
+<kw name="Input Text" owner="SeleniumLibrary">
+<msg time="2026-04-13T21:23:44.712845" level="INFO">Typing text 'gkazakou@impact.gr' into text field 'name:FormModel.Email'.</msg>
+<arg>name:FormModel.Email</arg>
+<arg>${user1}</arg>
+<doc>Types the given ``text`` into the text field identified by ``locator``.</doc>
+<status status="PASS" start="2026-04-13T21:23:44.712495" elapsed="0.266063"/>
+</kw>
+<kw name="Input Text" owner="SeleniumLibrary">
+<msg time="2026-04-13T21:23:44.979204" level="INFO">Typing text '31101995vatr@G' into text field 'name:FormModel.Password'.</msg>
+<arg>name:FormModel.Password</arg>
+<arg>${pwd1}</arg>
+<doc>Types the given ``text`` into the text field identified by ``locator``.</doc>
+<status status="PASS" start="2026-04-13T21:23:44.978800" elapsed="0.281407"/>
+</kw>
+<kw name="Click Element" owner="SeleniumLibrary">
+<msg time="2026-04-13T21:23:45.260853" level="INFO">Clicking element 'xpath=//button[text()='Sign In']'.</msg>
+<arg>xpath=//button[text()='Sign In']</arg>
+<doc>Click the element identified by ``locator``.</doc>
+<status status="PASS" start="2026-04-13T21:23:45.260468" elapsed="6.042492"/>
+</kw>
+<status status="PASS" start="2026-04-13T21:23:44.651721" elapsed="6.651337"/>
+</kw>
+<kw name="Close Browser" owner="SeleniumLibrary" type="TEARDOWN">
+<doc>Closes the current browser.</doc>
+<status status="PASS" start="2026-04-13T21:23:51.303881" elapsed="2.518793"/>
+</kw>
+<status status="PASS" start="2026-04-13T21:23:41.090066" elapsed="12.732938"/>
+</test>
+<doc>testLogin</doc>
+<status status="PASS" start="2026-04-13T21:23:40.815985" elapsed="13.008083"/>
+</suite>
+<statistics>
+<total>
+<stat pass="1" fail="0" skip="0">All Tests</stat>
+</total>
+<tag>
+</tag>
+<suite>
+<stat name="openWebsite" id="s1" pass="1" fail="0" skip="0">openWebsite</stat>
+</suite>
+</statistics>
+<errors>
+</errors>
+</robot>

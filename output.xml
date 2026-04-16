@@ -1,66 +1,219 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<robot generator="Robot 7.4.2 (Python 3.14.4 on win32)" generated="2026-04-13T21:23:40.814224" rpa="false" schemaversion="5">
-<suite id="s1" name="openWebsite" source="C:\Users\gkazakou\PycharmProjects\PythonProject\automation\openWebsite.robot">
-<test id="s1-t1" name="s1ecosportal" line="20">
-<kw name="Open the url" owner="resource" type="SETUP">
+<robot generator="Robot 7.4.2 (Python 3.14.4 on win32)" generated="2026-04-16T18:08:59.014545" rpa="false" schemaversion="5">
+<suite id="s1" name="Hotdog" source="C:\Users\gkazakou\PycharmProjects\PythonProject\automation\hotdog.robot">
+<test id="s1-t1" name="TC1 login Success" line="17">
 <kw name="Open Browser" owner="SeleniumLibrary">
-<msg time="2026-04-13T21:23:41.091308" level="INFO">Opening browser 'Chrome' to base url 'https://einvoice-demo-portal.s1ecos.gr/Accounts/Login?lang=en'.</msg>
-<arg>${urlPortal}</arg>
-<arg>${Browser}</arg>
+<msg time="2026-04-16T18:08:59.338095" level="INFO">Opening browser 'Chrome' to base url 'https://hotdoc.impact.gr/'.</msg>
+<arg>${urlHotdog}</arg>
+<arg>${Browser1}</arg>
 <doc>Opens a new browser instance to the optional ``url``.</doc>
-<status status="PASS" start="2026-04-13T21:23:41.091132" elapsed="3.559571"/>
+<status status="PASS" start="2026-04-16T18:08:59.335312" elapsed="3.821735"/>
 </kw>
-<status status="PASS" start="2026-04-13T21:23:41.090683" elapsed="3.560249"/>
+<kw name="Sleep" owner="BuiltIn">
+<msg time="2026-04-16T18:09:05.158629" level="INFO">Slept 2 seconds.</msg>
+<arg>2</arg>
+<doc>Pauses the test executed for the given time.</doc>
+<status status="PASS" start="2026-04-16T18:09:03.157797" elapsed="2.000943"/>
 </kw>
-<kw name="s1ecosportal Login code">
-<kw name="Maximize Browser Window" owner="SeleniumLibrary">
-<doc>Maximizes current browser window.</doc>
-<status status="PASS" start="2026-04-13T21:23:44.652056" elapsed="0.055821"/>
+<kw name="Click Button" owner="SeleniumLibrary">
+<msg time="2026-04-16T18:09:05.159612" level="INFO">Clicking button 'Σύνδεση'.</msg>
+<arg>Σύνδεση</arg>
+<doc>Clicks the button identified by ``locator``.</doc>
+<status status="PASS" start="2026-04-16T18:09:05.159205" elapsed="0.096740"/>
 </kw>
-<kw name="Set Selenium Implicit Wait" owner="SeleniumLibrary">
-<arg>${time}</arg>
-<doc>Sets the implicit wait value used by Selenium.</doc>
-<status status="PASS" start="2026-04-13T21:23:44.708023" elapsed="0.004303"/>
+<kw name="Sleep" owner="BuiltIn">
+<msg time="2026-04-16T18:09:09.257309" level="INFO">Slept 4 seconds.</msg>
+<arg>4</arg>
+<doc>Pauses the test executed for the given time.</doc>
+<status status="PASS" start="2026-04-16T18:09:05.256350" elapsed="4.001054"/>
+</kw>
+<kw name="Element Should Be Disabled" owner="SeleniumLibrary">
+<arg>id=loginButton</arg>
+<doc>Verifies that element identified by ``locator`` is disabled.</doc>
+<status status="PASS" start="2026-04-16T18:09:09.257743" elapsed="0.020007"/>
 </kw>
 <kw name="Input Text" owner="SeleniumLibrary">
-<msg time="2026-04-13T21:23:44.712845" level="INFO">Typing text 'gkazakou@impact.gr' into text field 'name:FormModel.Email'.</msg>
-<arg>name:FormModel.Email</arg>
-<arg>${user1}</arg>
+<msg time="2026-04-16T18:09:09.278247" level="INFO">Typing text 'gregkazakou@gmail.com' into text field 'id=emailInput'.</msg>
+<arg>id=emailInput</arg>
+<arg>${userEmail1}</arg>
 <doc>Types the given ``text`` into the text field identified by ``locator``.</doc>
-<status status="PASS" start="2026-04-13T21:23:44.712495" elapsed="0.266063"/>
+<status status="PASS" start="2026-04-16T18:09:09.278034" elapsed="0.104111"/>
 </kw>
-<kw name="Input Text" owner="SeleniumLibrary">
-<msg time="2026-04-13T21:23:44.979204" level="INFO">Typing text '31101995vatr@G' into text field 'name:FormModel.Password'.</msg>
-<arg>name:FormModel.Password</arg>
+<kw name="Input Password" owner="SeleniumLibrary">
+<msg time="2026-04-16T18:09:09.382882" level="INFO">Typing password into text field 'name=LoginInput.Password'.</msg>
+<msg time="2026-04-16T18:09:09.420342" level="INFO">Temporally setting log level to: NONE</msg>
+<arg>name=LoginInput.Password</arg>
 <arg>${pwd1}</arg>
-<doc>Types the given ``text`` into the text field identified by ``locator``.</doc>
-<status status="PASS" start="2026-04-13T21:23:44.978800" elapsed="0.281407"/>
+<doc>Types the given password into the text field identified by ``locator``.</doc>
+<status status="PASS" start="2026-04-16T18:09:09.382537" elapsed="0.086260"/>
 </kw>
 <kw name="Click Element" owner="SeleniumLibrary">
-<msg time="2026-04-13T21:23:45.260853" level="INFO">Clicking element 'xpath=//button[text()='Sign In']'.</msg>
-<arg>xpath=//button[text()='Sign In']</arg>
+<msg time="2026-04-16T18:09:09.469414" level="INFO">Clicking element 'id=loginButton'.</msg>
+<arg>id=loginButton</arg>
 <doc>Click the element identified by ``locator``.</doc>
-<status status="PASS" start="2026-04-13T21:23:45.260468" elapsed="6.042492"/>
+<status status="PASS" start="2026-04-16T18:09:09.469174" elapsed="0.536257"/>
 </kw>
-<status status="PASS" start="2026-04-13T21:23:44.651721" elapsed="6.651337"/>
+<kw name="Sleep" owner="BuiltIn">
+<msg time="2026-04-16T18:09:14.006906" level="INFO">Slept 4 seconds.</msg>
+<arg>4</arg>
+<doc>Pauses the test executed for the given time.</doc>
+<status status="PASS" start="2026-04-16T18:09:10.006002" elapsed="4.001027"/>
 </kw>
-<kw name="Close Browser" owner="SeleniumLibrary" type="TEARDOWN">
+<kw name="Close Browser" owner="SeleniumLibrary">
 <doc>Closes the current browser.</doc>
-<status status="PASS" start="2026-04-13T21:23:51.303881" elapsed="2.518793"/>
+<status status="PASS" start="2026-04-16T18:09:14.007606" elapsed="2.464556"/>
 </kw>
-<status status="PASS" start="2026-04-13T21:23:41.090066" elapsed="12.732938"/>
+<status status="PASS" start="2026-04-16T18:08:59.334528" elapsed="17.139395"/>
 </test>
-<doc>testLogin</doc>
-<status status="PASS" start="2026-04-13T21:23:40.815985" elapsed="13.008083"/>
+<test id="s1-t2" name="TC2 login Wrong Email" line="29">
+<kw name="Open Browser" owner="SeleniumLibrary">
+<msg time="2026-04-16T18:09:16.477195" level="INFO">Opening browser 'Chrome' to base url 'https://hotdoc.impact.gr/'.</msg>
+<arg>${urlHotdog}</arg>
+<arg>${Browser1}</arg>
+<doc>Opens a new browser instance to the optional ``url``.</doc>
+<status status="PASS" start="2026-04-16T18:09:16.476893" elapsed="2.848177"/>
+</kw>
+<kw name="Sleep" owner="BuiltIn">
+<msg time="2026-04-16T18:09:21.326681" level="INFO">Slept 2 seconds.</msg>
+<arg>2</arg>
+<doc>Pauses the test executed for the given time.</doc>
+<status status="PASS" start="2026-04-16T18:09:19.325544" elapsed="2.001275"/>
+</kw>
+<kw name="Click Button" owner="SeleniumLibrary">
+<msg time="2026-04-16T18:09:21.327425" level="INFO">Clicking button 'Σύνδεση'.</msg>
+<arg>Σύνδεση</arg>
+<doc>Clicks the button identified by ``locator``.</doc>
+<status status="PASS" start="2026-04-16T18:09:21.327174" elapsed="0.092174"/>
+</kw>
+<kw name="Sleep" owner="BuiltIn">
+<msg time="2026-04-16T18:09:25.420655" level="INFO">Slept 4 seconds.</msg>
+<arg>4</arg>
+<doc>Pauses the test executed for the given time.</doc>
+<status status="PASS" start="2026-04-16T18:09:21.419745" elapsed="4.001020"/>
+</kw>
+<kw name="Element Should Be Disabled" owner="SeleniumLibrary">
+<arg>id=loginButton</arg>
+<doc>Verifies that element identified by ``locator`` is disabled.</doc>
+<status status="PASS" start="2026-04-16T18:09:25.421184" elapsed="0.023399"/>
+</kw>
+<kw name="Input Text" owner="SeleniumLibrary">
+<msg time="2026-04-16T18:09:25.445316" level="INFO">Typing text 'invalid-email@email.com' into text field 'id=emailInput'.</msg>
+<arg>id=emailInput</arg>
+<arg>invalid-email@email.com</arg>
+<doc>Types the given ``text`` into the text field identified by ``locator``.</doc>
+<status status="PASS" start="2026-04-16T18:09:25.444986" elapsed="0.099568"/>
+</kw>
+<kw name="Input Password" owner="SeleniumLibrary">
+<msg time="2026-04-16T18:09:25.545283" level="INFO">Typing password into text field 'name=LoginInput.Password'.</msg>
+<msg time="2026-04-16T18:09:25.582707" level="INFO">Temporally setting log level to: NONE</msg>
+<arg>name=LoginInput.Password</arg>
+<arg>${pwd1}</arg>
+<doc>Types the given password into the text field identified by ``locator``.</doc>
+<status status="PASS" start="2026-04-16T18:09:25.544970" elapsed="0.087679"/>
+</kw>
+<kw name="Click Element" owner="SeleniumLibrary">
+<msg time="2026-04-16T18:09:25.633362" level="INFO">Clicking element 'id=loginButton'.</msg>
+<arg>id=loginButton</arg>
+<doc>Click the element identified by ``locator``.</doc>
+<status status="PASS" start="2026-04-16T18:09:25.633075" elapsed="0.073846"/>
+</kw>
+<kw name="Wait Until Element Is Visible" owner="SeleniumLibrary">
+<arg>xpath=//div[@class='validation-message' and (normalize-space()='Check your email address' or normalize-space()='Έλεγξε τη διεύθυνση email σου')]</arg>
+<doc>Waits until the element ``locator`` is visible.</doc>
+<status status="PASS" start="2026-04-16T18:09:25.707524" elapsed="0.271533"/>
+</kw>
+<kw name="Sleep" owner="BuiltIn">
+<msg time="2026-04-16T18:09:28.980430" level="INFO">Slept 3 seconds.</msg>
+<arg>3</arg>
+<doc>Pauses the test executed for the given time.</doc>
+<status status="PASS" start="2026-04-16T18:09:25.979452" elapsed="3.001075"/>
+</kw>
+<kw name="Close Browser" owner="SeleniumLibrary">
+<doc>Closes the current browser.</doc>
+<status status="PASS" start="2026-04-16T18:09:28.981038" elapsed="2.464878"/>
+</kw>
+<status status="PASS" start="2026-04-16T18:09:16.476121" elapsed="14.970148"/>
+</test>
+<test id="s1-t3" name="TC3 login Wrong Password" line="42">
+<kw name="Open Browser" owner="SeleniumLibrary">
+<msg time="2026-04-16T18:09:31.448106" level="INFO">Opening browser 'Chrome' to base url 'https://hotdoc.impact.gr/'.</msg>
+<arg>${urlHotdog}</arg>
+<arg>${Browser1}</arg>
+<doc>Opens a new browser instance to the optional ``url``.</doc>
+<status status="PASS" start="2026-04-16T18:09:31.447921" elapsed="2.796885"/>
+</kw>
+<kw name="Sleep" owner="BuiltIn">
+<msg time="2026-04-16T18:09:36.246158" level="INFO">Slept 2 seconds.</msg>
+<arg>2</arg>
+<doc>Pauses the test executed for the given time.</doc>
+<status status="PASS" start="2026-04-16T18:09:34.245246" elapsed="2.001046"/>
+</kw>
+<kw name="Click Button" owner="SeleniumLibrary">
+<msg time="2026-04-16T18:09:36.247168" level="INFO">Clicking button 'Σύνδεση'.</msg>
+<arg>Σύνδεση</arg>
+<doc>Clicks the button identified by ``locator``.</doc>
+<status status="PASS" start="2026-04-16T18:09:36.246817" elapsed="0.085099"/>
+</kw>
+<kw name="Sleep" owner="BuiltIn">
+<msg time="2026-04-16T18:09:40.333265" level="INFO">Slept 4 seconds.</msg>
+<arg>4</arg>
+<doc>Pauses the test executed for the given time.</doc>
+<status status="PASS" start="2026-04-16T18:09:36.332238" elapsed="4.001245"/>
+</kw>
+<kw name="Element Should Be Disabled" owner="SeleniumLibrary">
+<arg>id=loginButton</arg>
+<doc>Verifies that element identified by ``locator`` is disabled.</doc>
+<status status="PASS" start="2026-04-16T18:09:40.334027" elapsed="0.020168"/>
+</kw>
+<kw name="Input Text" owner="SeleniumLibrary">
+<msg time="2026-04-16T18:09:40.354807" level="INFO">Typing text 'gregkazakou@gmail.com' into text field 'id=emailInput'.</msg>
+<arg>id=emailInput</arg>
+<arg>${userEmail1}</arg>
+<doc>Types the given ``text`` into the text field identified by ``locator``.</doc>
+<status status="PASS" start="2026-04-16T18:09:40.354569" elapsed="0.094291"/>
+</kw>
+<kw name="Input Password" owner="SeleniumLibrary">
+<msg time="2026-04-16T18:09:40.449652" level="INFO">Typing password into text field 'name=LoginInput.Password'.</msg>
+<msg time="2026-04-16T18:09:40.484643" level="INFO">Temporally setting log level to: NONE</msg>
+<arg>name=LoginInput.Password</arg>
+<arg>wrongpassword</arg>
+<doc>Types the given password into the text field identified by ``locator``.</doc>
+<status status="PASS" start="2026-04-16T18:09:40.449319" elapsed="0.074736"/>
+</kw>
+<kw name="Click Element" owner="SeleniumLibrary">
+<msg time="2026-04-16T18:09:40.524680" level="INFO">Clicking element 'id=loginButton'.</msg>
+<arg>id=loginButton</arg>
+<doc>Click the element identified by ``locator``.</doc>
+<status status="PASS" start="2026-04-16T18:09:40.524442" elapsed="0.298984"/>
+</kw>
+<kw name="Wait Until Element Is Visible" owner="SeleniumLibrary">
+<arg>xpath=//div[@class='validation-message' and (normalize-space()='Ο κωδικός πρόσβασης δεν είναι σωστός' or normalize-space()='The password is incorrect')]</arg>
+<doc>Waits until the element ``locator`` is visible.</doc>
+<status status="PASS" start="2026-04-16T18:09:40.823912" elapsed="0.091915"/>
+</kw>
+<kw name="Sleep" owner="BuiltIn">
+<msg time="2026-04-16T18:09:43.917388" level="INFO">Slept 3 seconds.</msg>
+<arg>3</arg>
+<doc>Pauses the test executed for the given time.</doc>
+<status status="PASS" start="2026-04-16T18:09:40.916484" elapsed="3.001029"/>
+</kw>
+<kw name="Close Browser" owner="SeleniumLibrary">
+<doc>Closes the current browser.</doc>
+<status status="PASS" start="2026-04-16T18:09:43.917896" elapsed="2.460785"/>
+</kw>
+<status status="PASS" start="2026-04-16T18:09:31.447454" elapsed="14.931804"/>
+</test>
+<doc>Hotdog</doc>
+<status status="PASS" start="2026-04-16T18:08:59.017491" elapsed="47.362458"/>
 </suite>
 <statistics>
 <total>
-<stat pass="1" fail="0" skip="0">All Tests</stat>
+<stat pass="3" fail="0" skip="0">All Tests</stat>
 </total>
 <tag>
 </tag>
 <suite>
-<stat name="openWebsite" id="s1" pass="1" fail="0" skip="0">openWebsite</stat>
+<stat name="Hotdog" id="s1" pass="3" fail="0" skip="0">Hotdog</stat>
 </suite>
 </statistics>
 <errors>

@@ -11,6 +11,8 @@ ${user1}  gkazakou@impact.gr
 ${pwd1}  31101995vatr@G
 ${user2}  gregkazakou@gmail.com
 ${pwd2}  31101995vatr@G
+${apiKey}     03ac2ca0-2815-41eb-894f-9d3a80c6c9da
+${issuerTIN}    EL154697391
 
 *** Keywords ***
 Open the url

@@ -16,7 +16,7 @@ s1ecosportal
 
 *** Keywords ***
 s1ecosportal Login code
-   Maximize Browser Window
+
    Set Selenium Implicit Wait   ${time}
    Input Text  name:FormModel.Email   ${user1}
    Input Text  name:FormModel.Password   ${pwd1}

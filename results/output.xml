@@ -1,234 +1,369 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<robot generator="Robot 7.4.2 (Python 3.14.4 on win32)" generated="2026-04-13T20:51:44.356056" rpa="false" schemaversion="5">
+<robot generator="Robot 7.4.2 (Python 3.14.4 on win32)" generated="2026-04-16T21:56:38.533658" rpa="false" schemaversion="5">
 <suite id="s1" name="PythonProject" source="C:\Users\gkazakou\PycharmProjects\PythonProject">
 <suite id="s1-s1" name="Automation" source="C:\Users\gkazakou\PycharmProjects\PythonProject\Automation">
-<suite id="s1-s1-s1" name="openWebsite" source="C:\Users\gkazakou\PycharmProjects\PythonProject\Automation\openWebsite.robot">
-<test id="s1-s1-s1-t1" name="s1ecosportal" line="16">
-<kw name="s1ecosportal Login code">
+<suite id="s1-s1-s1" name="Hotdog" source="C:\Users\gkazakou\PycharmProjects\PythonProject\Automation\Hotdog.robot">
+<test id="s1-s1-s1-t1" name="TC1 Login Success" line="45">
+<kw name="Do Login">
 <kw name="Open Browser" owner="SeleniumLibrary">
-<msg time="2026-04-13T20:51:44.636143" level="INFO">Opening browser 'Chrome' to base url 'https://einvoice-demo-portal.s1ecos.gr/Accounts/Login?lang=en'.</msg>
-<arg>${urlPortal}</arg>
-<arg>${Browser}</arg>
+<msg time="2026-04-16T21:56:38.757169" level="INFO">Opening browser 'Chrome' to base url 'https://hotdoc.impact.gr/'.</msg>
+<arg>${urlHotdog}</arg>
+<arg>${Browser1}</arg>
 <doc>Opens a new browser instance to the optional ``url``.</doc>
-<status status="PASS" start="2026-04-13T20:51:44.635532" elapsed="3.464842"/>
+<status status="PASS" start="2026-04-16T21:56:38.756857" elapsed="2.694889"/>
 </kw>
-<kw name="Maximize Browser Window" owner="SeleniumLibrary">
-<doc>Maximizes current browser window.</doc>
-<status status="PASS" start="2026-04-13T20:51:48.100583" elapsed="0.048694"/>
+<kw name="Sleep" owner="BuiltIn">
+<msg time="2026-04-16T21:56:43.453111" level="INFO">Slept 2 seconds.</msg>
+<arg>2s</arg>
+<doc>Pauses the test executed for the given time.</doc>
+<status status="PASS" start="2026-04-16T21:56:41.451973" elapsed="2.002882"/>
 </kw>
-<kw name="Set Selenium Implicit Wait" owner="SeleniumLibrary">
-<arg>${time}</arg>
-<doc>Sets the implicit wait value used by Selenium.</doc>
-<status status="PASS" start="2026-04-13T20:51:48.149693" elapsed="0.007563"/>
+<kw name="Click Button" owner="SeleniumLibrary">
+<msg time="2026-04-16T21:56:43.457221" level="INFO">Clicking button 'Σύνδεση'.</msg>
+<arg>Σύνδεση</arg>
+<doc>Clicks the button identified by ``locator``.</doc>
+<status status="PASS" start="2026-04-16T21:56:43.455653" elapsed="0.069736"/>
+</kw>
+<kw name="Sleep" owner="BuiltIn">
+<msg time="2026-04-16T21:56:47.526357" level="INFO">Slept 4 seconds.</msg>
+<arg>4s</arg>
+<doc>Pauses the test executed for the given time.</doc>
+<status status="PASS" start="2026-04-16T21:56:43.525607" elapsed="4.001318"/>
+</kw>
+<kw name="Element Should Be Disabled" owner="SeleniumLibrary">
+<arg>id=loginButton</arg>
+<doc>Verifies that element identified by ``locator`` is disabled.</doc>
+<status status="PASS" start="2026-04-16T21:56:47.527233" elapsed="0.022516"/>
 </kw>
 <kw name="Input Text" owner="SeleniumLibrary">
-<msg time="2026-04-13T20:51:48.158668" level="INFO">Typing text 'gkazakou@impact.gr' into text field 'name:FormModel.Email'.</msg>
-<arg>name:FormModel.Email</arg>
-<arg>${user1}</arg>
+<msg time="2026-04-16T21:56:47.550324" level="INFO">Typing text 'gregkazakou@gmail.com' into text field 'id=emailInput'.</msg>
+<arg>id=emailInput</arg>
+<arg>${email}</arg>
 <doc>Types the given ``text`` into the text field identified by ``locator``.</doc>
-<status status="PASS" start="2026-04-13T20:51:48.157653" elapsed="0.205935"/>
+<status status="PASS" start="2026-04-16T21:56:47.549932" elapsed="0.080369"/>
 </kw>
-<kw name="Input Text" owner="SeleniumLibrary">
-<msg time="2026-04-13T20:51:48.364516" level="INFO">Typing text '31101995vatr@G' into text field 'name:FormModel.Password'.</msg>
-<arg>name:FormModel.Password</arg>
-<arg>${pwd1}</arg>
-<doc>Types the given ``text`` into the text field identified by ``locator``.</doc>
-<status status="PASS" start="2026-04-13T20:51:48.363873" elapsed="0.229576"/>
+<kw name="Input Password" owner="SeleniumLibrary">
+<msg time="2026-04-16T21:56:47.631052" level="INFO">Typing password into text field 'name=LoginInput.Password'.</msg>
+<msg time="2026-04-16T21:56:47.663305" level="INFO">Temporally setting log level to: NONE</msg>
+<arg>name=LoginInput.Password</arg>
+<arg>${password}</arg>
+<doc>Types the given password into the text field identified by ``locator``.</doc>
+<status status="PASS" start="2026-04-16T21:56:47.630540" elapsed="0.069977"/>
 </kw>
 <kw name="Click Element" owner="SeleniumLibrary">
-<msg time="2026-04-13T20:51:48.596075" level="INFO">Clicking element 'name=Sign In'.</msg>
-<msg time="2026-04-13T20:51:53.442023" level="WARN">Keyword 'Capture Page Screenshot' could not be run on failure: Message: invalid session id; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
-Stacktrace:
-	chromedriver!GetHandleVerifier [0x7ff724230295+146d5]
-	chromedriver!GetHandleVerifier [0x7ff724230300+14740]
-	chromedriver!(No symbol) [0x7ff723f9d5b6]
-	chromedriver!(No symbol) [0x7ff723fe8093]
-	chromedriver!(No symbol) [0x7ff72401fe72]
-	chromedriver!(No symbol) [0x7ff72401a0d1]
-	chromedriver!(No symbol) [0x7ff724019383]
-	chromedriver!(No symbol) [0x7ff723f660b5]
-	chromedriver!GetHandleVerifier [0x7ff724545949+329d89]
-	chromedriver!GetHandleVerifier [0x7ff72453fe96+3242d6]
-	chromedriver!GetHandleVerifier [0x7ff724563102+347542]
-	chromedriver!GetHandleVerifier [0x7ff72424d425+31865]
-	chromedriver!GetHandleVerifier [0x7ff72425605c+3a49c]
-	chromedriver!(No symbol) [0x7ff723f64e4a]
-	chromedriver!GetHandleVerifier [0x7ff7246a2118+486558]
-	KERNEL32!BaseThreadInitThunk [0x7ff927c7259d+1d]
-	ntdll!RtlUserThreadStart [0x7ff929f8af78+28]
-</msg>
-<msg time="2026-04-13T20:51:53.445525" level="FAIL">InvalidSessionIdException: Message: invalid session id: session deleted as the browser has closed the connection
-from disconnected: unable to send message to renderer
-  (Session info: chrome=147.0.7727.56); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
-Stacktrace:
-	chromedriver!GetHandleVerifier [0x7ff724230295+146d5]
-	chromedriver!GetHandleVerifier [0x7ff724230300+14740]
-	chromedriver!(No symbol) [0x7ff723f9d7cd]
-	chromedriver!(No symbol) [0x7ff723f88e90]
-	chromedriver!(No symbol) [0x7ff723f88dec]
-	chromedriver!(No symbol) [0x7ff723f87649]
-	chromedriver!(No symbol) [0x7ff723f881ff]
-	chromedriver!(No symbol) [0x7ff723fa30d6]
-	chromedriver!(No symbol) [0x7ff723fa3c1b]
-	chromedriver!(No symbol) [0x7ff723fa8875]
-	chromedriver!(No symbol) [0x7ff723fa893f]
-	chromedriver!(No symbol) [0x7ff723ff63ce]
-	chromedriver!(No symbol) [0x7ff723ff6f5c]
-	chromedriver!(No symbol) [0x7ff724047cf7]
-	chromedriver!(No symbol) [0x7ff724044818]
-	chromedriver!(No symbol) [0x7ff723fe9018]
-	chromedriver!(No symbol) [0x7ff723fe9f03]
-	chromedriver!GetHandleVerifier [0x7ff724545949+329d89]
-	chromedriver!GetHandleVerifier [0x7ff72453fe96+3242d6]
-	chromedriver!GetHandleVerifier [0x7ff724563102+347542]
-	chromedriver!GetHandleVerifier [0x7ff72424d425+31865]
-	chromedriver!GetHandleVerifier [0x7ff72425605c+3a49c]
-	chromedriver!GetHandleVerifier [0x7ff724239684+1dac4]
-	chromedriver!GetHandleVerifier [0x7ff724239836+1dc76]
-	chromedriver!GetHandleVerifier [0x7ff72421e347+2787]
-	KERNEL32!BaseThreadInitThunk [0x7ff927c7259d+1d]
-	ntdll!RtlUserThreadStart [0x7ff929f8af78+28]
-</msg>
-<arg>name=Sign In</arg>
+<msg time="2026-04-16T21:56:47.701131" level="INFO">Clicking element 'id=loginButton'.</msg>
+<arg>id=loginButton</arg>
 <doc>Click the element identified by ``locator``.</doc>
-<status status="FAIL" start="2026-04-13T20:51:48.594529" elapsed="4.868749">InvalidSessionIdException: Message: invalid session id: session deleted as the browser has closed the connection
-from disconnected: unable to send message to renderer
-  (Session info: chrome=147.0.7727.56); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
-Stacktrace:
-	chromedriver!GetHandleVerifier [0x7ff724230295+146d5]
-	chromedriver!GetHandleVerifier [0x7ff724230300+14740]
-	chromedriver!(No symbol) [0x7ff723f9d7cd]
-	chromedriver!(No symbol) [0x7ff723f88e90]
-	chromedriver!(No symbol) [0x7ff723f88dec]
-	chromedriver!(No symbol) [0x7ff723f87649]
-	chromedriver!(No symbol) [0x7ff723f881ff]
-	chromedriver!(No symbol) [0x7ff723fa30d6]
-	chromedriver!(No symbol) [0x7ff723fa3c1b]
-	chromedriver!(No symbol) [0x7ff723fa8875]
-	chromedriver!(No symbol) [0x7ff723fa893f]
-	chromedriver!(No symbol) [0x7ff723ff63ce]
-	chromedriver!(No symbol) [0x7ff723ff6f5c]
-	chromedriver!(No symbol) [0x7ff724047cf7]
-	chromedriver!(No symbol) [0x7ff724044818]
-	chromedriver!(No symbol) [0x7ff723fe9018]
-	chromedriver!(No symbol) [0x7ff723fe9f03]
-	chromedriver!GetHandleVerifier [0x7ff724545949+329d89]
-	chromedriver!GetHandleVerifier [0x7ff72453fe96+3242d6]
-	chromedriver!GetHandleVerifier [0x7ff724563102+347542]
-	chromedriver!GetHandleVerifier [0x7ff72424d425+31865]
-	chromedriver!GetHandleVerifier [0x7ff72425605c+3a49c]
-	chromedriver!GetHandleVerifier [0x7ff724239684+1dac4]
-	chromedriver!GetHandleVerifier [0x7ff724239836+1dc76]
-	chromedriver!GetHandleVerifier [0x7ff72421e347+2787]
-	KERNEL32!BaseThreadInitThunk [0x7ff927c7259d+1d]
-	ntdll!RtlUserThreadStart [0x7ff929f8af78+28]
-</status>
+<status status="PASS" start="2026-04-16T21:56:47.700716" elapsed="0.438948"/>
 </kw>
-<status status="FAIL" start="2026-04-13T20:51:44.634644" elapsed="8.829366">InvalidSessionIdException: Message: invalid session id: session deleted as the browser has closed the connection
-from disconnected: unable to send message to renderer
-  (Session info: chrome=147.0.7727.56); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
-Stacktrace:
-	chromedriver!GetHandleVerifier [0x7ff724230295+146d5]
-	chromedriver!GetHandleVerifier [0x7ff724230300+14740]
-	chromedriver!(No symbol) [0x7ff723f9d7cd]
-	chromedriver!(No symbol) [0x7ff723f88e90]
-	chromedriver!(No symbol) [0x7ff723f88dec]
-	chromedriver!(No symbol) [0x7ff723f87649]
-	chromedriver!(No symbol) [0x7ff723f881ff]
-	chromedriver!(No symbol) [0x7ff723fa30d6]
-	chromedriver!(No symbol) [0x7ff723fa3c1b]
-	chromedriver!(No symbol) [0x7ff723fa8875]
-	chromedriver!(No symbol) [0x7ff723fa893f]
-	chromedriver!(No symbol) [0x7ff723ff63ce]
-	chromedriver!(No symbol) [0x7ff723ff6f5c]
-	chromedriver!(No symbol) [0x7ff724047cf7]
-	chromedriver!(No symbol) [0x7ff724044818]
-	chromedriver!(No symbol) [0x7ff723fe9018]
-	chromedriver!(No symbol) [0x7ff723fe9f03]
-	chromedriver!GetHandleVerifier [0x7ff724545949+329d89]
-	chromedriver!GetHandleVerifier [0x7ff72453fe96+3242d6]
-	chromedriver!GetHandleVerifier [0x7ff724563102+347542]
-	chromedriver!GetHandleVerifier [0x7ff72424d425+31865]
-	chromedriver!GetHandleVerifier [0x7ff72425605c+3a49c]
-	chromedriver!GetHandleVerifier [0x7ff724239684+1dac4]
-	chromedriver!GetHandleVerifier [0x7ff724239836+1dc76]
-	chromedriver!GetHandleVerifier [0x7ff72421e347+2787]
-	KERNEL32!BaseThreadInitThunk [0x7ff927c7259d+1d]
-	ntdll!RtlUserThreadStart [0x7ff929f8af78+28]
-</status>
+<doc>login - for all TC</doc>
+<status status="PASS" start="2026-04-16T21:56:38.756118" elapsed="9.383866"/>
 </kw>
-<status status="FAIL" start="2026-04-13T20:51:44.632416" elapsed="8.832090">InvalidSessionIdException: Message: invalid session id: session deleted as the browser has closed the connection
-from disconnected: unable to send message to renderer
-  (Session info: chrome=147.0.7727.56); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
-Stacktrace:
-	chromedriver!GetHandleVerifier [0x7ff724230295+146d5]
-	chromedriver!GetHandleVerifier [0x7ff724230300+14740]
-	chromedriver!(No symbol) [0x7ff723f9d7cd]
-	chromedriver!(No symbol) [0x7ff723f88e90]
-	chromedriver!(No symbol) [0x7ff723f88dec]
-	chromedriver!(No symbol) [0x7ff723f87649]
-	chromedriver!(No symbol) [0x7ff723f881ff]
-	chromedriver!(No symbol) [0x7ff723fa30d6]
-	chromedriver!(No symbol) [0x7ff723fa3c1b]
-	chromedriver!(No symbol) [0x7ff723fa8875]
-	chromedriver!(No symbol) [0x7ff723fa893f]
-	chromedriver!(No symbol) [0x7ff723ff63ce]
-	chromedriver!(No symbol) [0x7ff723ff6f5c]
-	chromedriver!(No symbol) [0x7ff724047cf7]
-	chromedriver!(No symbol) [0x7ff724044818]
-	chromedriver!(No symbol) [0x7ff723fe9018]
-	chromedriver!(No symbol) [0x7ff723fe9f03]
-	chromedriver!GetHandleVerifier [0x7ff724545949+329d89]
-	chromedriver!GetHandleVerifier [0x7ff72453fe96+3242d6]
-	chromedriver!GetHandleVerifier [0x7ff724563102+347542]
-	chromedriver!GetHandleVerifier [0x7ff72424d425+31865]
-	chromedriver!GetHandleVerifier [0x7ff72425605c+3a49c]
-	chromedriver!GetHandleVerifier [0x7ff724239684+1dac4]
-	chromedriver!GetHandleVerifier [0x7ff724239836+1dc76]
-	chromedriver!GetHandleVerifier [0x7ff72421e347+2787]
-	KERNEL32!BaseThreadInitThunk [0x7ff927c7259d+1d]
-	ntdll!RtlUserThreadStart [0x7ff929f8af78+28]
-</status>
+<kw name="Sleep" owner="BuiltIn">
+<msg time="2026-04-16T21:56:52.141307" level="INFO">Slept 4 seconds.</msg>
+<arg>4s</arg>
+<doc>Pauses the test executed for the given time.</doc>
+<status status="PASS" start="2026-04-16T21:56:48.140159" elapsed="4.001710"/>
+</kw>
+<kw name="Close Browser" owner="SeleniumLibrary">
+<doc>Closes the current browser.</doc>
+<status status="PASS" start="2026-04-16T21:56:52.142042" elapsed="2.448821"/>
+</kw>
+<status status="PASS" start="2026-04-16T21:56:38.754268" elapsed="15.836807"/>
 </test>
-<doc>testLogin</doc>
-<status status="FAIL" start="2026-04-13T20:51:44.453414" elapsed="9.015052"/>
+<test id="s1-s1-s1-t2" name="TC2 Login Wrong Email" line="50">
+<kw name="Do Login">
+<kw name="Open Browser" owner="SeleniumLibrary">
+<msg time="2026-04-16T21:56:54.594904" level="INFO">Opening browser 'Chrome' to base url 'https://hotdoc.impact.gr/'.</msg>
+<arg>${urlHotdog}</arg>
+<arg>${Browser1}</arg>
+<doc>Opens a new browser instance to the optional ``url``.</doc>
+<status status="PASS" start="2026-04-16T21:56:54.594620" elapsed="2.884980"/>
+</kw>
+<kw name="Sleep" owner="BuiltIn">
+<msg time="2026-04-16T21:56:59.480457" level="INFO">Slept 2 seconds.</msg>
+<arg>2s</arg>
+<doc>Pauses the test executed for the given time.</doc>
+<status status="PASS" start="2026-04-16T21:56:57.479800" elapsed="2.001025"/>
+</kw>
+<kw name="Click Button" owner="SeleniumLibrary">
+<msg time="2026-04-16T21:56:59.481360" level="INFO">Clicking button 'Σύνδεση'.</msg>
+<arg>Σύνδεση</arg>
+<doc>Clicks the button identified by ``locator``.</doc>
+<status status="PASS" start="2026-04-16T21:56:59.480996" elapsed="0.068732"/>
+</kw>
+<kw name="Sleep" owner="BuiltIn">
+<msg time="2026-04-16T21:57:03.551563" level="INFO">Slept 4 seconds.</msg>
+<arg>4s</arg>
+<doc>Pauses the test executed for the given time.</doc>
+<status status="PASS" start="2026-04-16T21:56:59.550192" elapsed="4.002704"/>
+</kw>
+<kw name="Element Should Be Disabled" owner="SeleniumLibrary">
+<arg>id=loginButton</arg>
+<doc>Verifies that element identified by ``locator`` is disabled.</doc>
+<status status="PASS" start="2026-04-16T21:57:03.553601" elapsed="0.022634"/>
+</kw>
+<kw name="Input Text" owner="SeleniumLibrary">
+<msg time="2026-04-16T21:57:03.576860" level="INFO">Typing text 'invalid-email@email.com' into text field 'id=emailInput'.</msg>
+<arg>id=emailInput</arg>
+<arg>${email}</arg>
+<doc>Types the given ``text`` into the text field identified by ``locator``.</doc>
+<status status="PASS" start="2026-04-16T21:57:03.576441" elapsed="0.077827"/>
+</kw>
+<kw name="Input Password" owner="SeleniumLibrary">
+<msg time="2026-04-16T21:57:03.654808" level="INFO">Typing password into text field 'name=LoginInput.Password'.</msg>
+<msg time="2026-04-16T21:57:03.680898" level="INFO">Temporally setting log level to: NONE</msg>
+<arg>name=LoginInput.Password</arg>
+<arg>${password}</arg>
+<doc>Types the given password into the text field identified by ``locator``.</doc>
+<status status="PASS" start="2026-04-16T21:57:03.654438" elapsed="0.059616"/>
+</kw>
+<kw name="Click Element" owner="SeleniumLibrary">
+<msg time="2026-04-16T21:57:03.714577" level="INFO">Clicking element 'id=loginButton'.</msg>
+<arg>id=loginButton</arg>
+<doc>Click the element identified by ``locator``.</doc>
+<status status="PASS" start="2026-04-16T21:57:03.714222" elapsed="0.049648"/>
+</kw>
+<arg>email=invalid-email@email.com</arg>
+<doc>login - for all TC</doc>
+<status status="PASS" start="2026-04-16T21:56:54.594136" elapsed="9.169881"/>
+</kw>
+<kw name="Wait Until Element Is Visible" owner="SeleniumLibrary">
+<arg>xpath=//div[@class='validation-message' and (normalize-space()='Check your email address' or normalize-space()='Έλεγξε τη διεύθυνση email σου')]</arg>
+<doc>Waits until the element ``locator`` is visible.</doc>
+<status status="PASS" start="2026-04-16T21:57:03.764130" elapsed="0.496821"/>
+</kw>
+<kw name="Sleep" owner="BuiltIn">
+<msg time="2026-04-16T21:57:07.261932" level="INFO">Slept 3 seconds.</msg>
+<arg>3s</arg>
+<doc>Pauses the test executed for the given time.</doc>
+<status status="PASS" start="2026-04-16T21:57:04.261137" elapsed="3.001118"/>
+</kw>
+<kw name="Close Browser" owner="SeleniumLibrary">
+<doc>Closes the current browser.</doc>
+<status status="PASS" start="2026-04-16T21:57:07.262424" elapsed="2.415027"/>
+</kw>
+<status status="PASS" start="2026-04-16T21:56:54.592515" elapsed="15.085503"/>
+</test>
+<test id="s1-s1-s1-t3" name="TC3 Login Wrong Password" line="56">
+<kw name="Do Login">
+<kw name="Open Browser" owner="SeleniumLibrary">
+<msg time="2026-04-16T21:57:09.685473" level="INFO">Opening browser 'Chrome' to base url 'https://hotdoc.impact.gr/'.</msg>
+<arg>${urlHotdog}</arg>
+<arg>${Browser1}</arg>
+<doc>Opens a new browser instance to the optional ``url``.</doc>
+<status status="PASS" start="2026-04-16T21:57:09.685029" elapsed="2.489378"/>
+</kw>
+<kw name="Sleep" owner="BuiltIn">
+<msg time="2026-04-16T21:57:14.175706" level="INFO">Slept 2 seconds.</msg>
+<arg>2s</arg>
+<doc>Pauses the test executed for the given time.</doc>
+<status status="PASS" start="2026-04-16T21:57:12.174621" elapsed="2.001835"/>
+</kw>
+<kw name="Click Button" owner="SeleniumLibrary">
+<msg time="2026-04-16T21:57:14.177225" level="INFO">Clicking button 'Σύνδεση'.</msg>
+<arg>Σύνδεση</arg>
+<doc>Clicks the button identified by ``locator``.</doc>
+<status status="PASS" start="2026-04-16T21:57:14.176741" elapsed="0.083870"/>
+</kw>
+<kw name="Sleep" owner="BuiltIn">
+<msg time="2026-04-16T21:57:18.261735" level="INFO">Slept 4 seconds.</msg>
+<arg>4s</arg>
+<doc>Pauses the test executed for the given time.</doc>
+<status status="PASS" start="2026-04-16T21:57:14.260823" elapsed="4.002063"/>
+</kw>
+<kw name="Element Should Be Disabled" owner="SeleniumLibrary">
+<arg>id=loginButton</arg>
+<doc>Verifies that element identified by ``locator`` is disabled.</doc>
+<status status="PASS" start="2026-04-16T21:57:18.263064" elapsed="0.018366"/>
+</kw>
+<kw name="Input Text" owner="SeleniumLibrary">
+<msg time="2026-04-16T21:57:18.281945" level="INFO">Typing text 'gregkazakou@gmail.com' into text field 'id=emailInput'.</msg>
+<arg>id=emailInput</arg>
+<arg>${email}</arg>
+<doc>Types the given ``text`` into the text field identified by ``locator``.</doc>
+<status status="PASS" start="2026-04-16T21:57:18.281608" elapsed="0.081172"/>
+</kw>
+<kw name="Input Password" owner="SeleniumLibrary">
+<msg time="2026-04-16T21:57:18.363363" level="INFO">Typing password into text field 'name=LoginInput.Password'.</msg>
+<msg time="2026-04-16T21:57:18.391499" level="INFO">Temporally setting log level to: NONE</msg>
+<arg>name=LoginInput.Password</arg>
+<arg>${password}</arg>
+<doc>Types the given password into the text field identified by ``locator``.</doc>
+<status status="PASS" start="2026-04-16T21:57:18.362971" elapsed="0.062579"/>
+</kw>
+<kw name="Click Element" owner="SeleniumLibrary">
+<msg time="2026-04-16T21:57:18.426094" level="INFO">Clicking element 'id=loginButton'.</msg>
+<arg>id=loginButton</arg>
+<doc>Click the element identified by ``locator``.</doc>
+<status status="PASS" start="2026-04-16T21:57:18.425726" elapsed="0.051733"/>
+</kw>
+<arg>password=wrongpassword</arg>
+<doc>login - for all TC</doc>
+<status status="PASS" start="2026-04-16T21:57:09.684284" elapsed="8.793321"/>
+</kw>
+<kw name="Wait Until Element Is Visible" owner="SeleniumLibrary">
+<arg>xpath=//div[@class='validation-message' and (normalize-space()='Ο κωδικός πρόσβασης δεν είναι σωστός' or normalize-space()='The password is incorrect')]</arg>
+<doc>Waits until the element ``locator`` is visible.</doc>
+<status status="PASS" start="2026-04-16T21:57:18.477721" elapsed="0.554677"/>
+</kw>
+<kw name="Sleep" owner="BuiltIn">
+<msg time="2026-04-16T21:57:22.033523" level="INFO">Slept 3 seconds.</msg>
+<arg>3s</arg>
+<doc>Pauses the test executed for the given time.</doc>
+<status status="PASS" start="2026-04-16T21:57:19.032576" elapsed="3.001374"/>
+</kw>
+<kw name="Close Browser" owner="SeleniumLibrary">
+<doc>Closes the current browser.</doc>
+<status status="PASS" start="2026-04-16T21:57:22.034128" elapsed="2.444855"/>
+</kw>
+<status status="PASS" start="2026-04-16T21:57:09.681678" elapsed="14.797600"/>
+</test>
+<test id="s1-s1-s1-t4" name="TC4 Select Company Success" line="62">
+<kw name="Do Login" type="SETUP">
+<kw name="Open Browser" owner="SeleniumLibrary">
+<msg time="2026-04-16T21:57:24.483450" level="INFO">Opening browser 'Chrome' to base url 'https://hotdoc.impact.gr/'.</msg>
+<arg>${urlHotdog}</arg>
+<arg>${Browser1}</arg>
+<doc>Opens a new browser instance to the optional ``url``.</doc>
+<status status="PASS" start="2026-04-16T21:57:24.483175" elapsed="2.492558"/>
+</kw>
+<kw name="Sleep" owner="BuiltIn">
+<msg time="2026-04-16T21:57:28.977201" level="INFO">Slept 2 seconds.</msg>
+<arg>2s</arg>
+<doc>Pauses the test executed for the given time.</doc>
+<status status="PASS" start="2026-04-16T21:57:26.976025" elapsed="2.002511"/>
+</kw>
+<kw name="Click Button" owner="SeleniumLibrary">
+<msg time="2026-04-16T21:57:28.980224" level="INFO">Clicking button 'Σύνδεση'.</msg>
+<arg>Σύνδεση</arg>
+<doc>Clicks the button identified by ``locator``.</doc>
+<status status="PASS" start="2026-04-16T21:57:28.979158" elapsed="0.074758"/>
+</kw>
+<kw name="Sleep" owner="BuiltIn">
+<msg time="2026-04-16T21:57:33.055139" level="INFO">Slept 4 seconds.</msg>
+<arg>4s</arg>
+<doc>Pauses the test executed for the given time.</doc>
+<status status="PASS" start="2026-04-16T21:57:29.054118" elapsed="4.001825"/>
+</kw>
+<kw name="Element Should Be Disabled" owner="SeleniumLibrary">
+<arg>id=loginButton</arg>
+<doc>Verifies that element identified by ``locator`` is disabled.</doc>
+<status status="PASS" start="2026-04-16T21:57:33.056431" elapsed="0.021506"/>
+</kw>
+<kw name="Input Text" owner="SeleniumLibrary">
+<msg time="2026-04-16T21:57:33.078574" level="INFO">Typing text 'gregkazakou@gmail.com' into text field 'id=emailInput'.</msg>
+<arg>id=emailInput</arg>
+<arg>${email}</arg>
+<doc>Types the given ``text`` into the text field identified by ``locator``.</doc>
+<status status="PASS" start="2026-04-16T21:57:33.078124" elapsed="0.085362"/>
+</kw>
+<kw name="Input Password" owner="SeleniumLibrary">
+<msg time="2026-04-16T21:57:33.164119" level="INFO">Typing password into text field 'name=LoginInput.Password'.</msg>
+<msg time="2026-04-16T21:57:33.193814" level="INFO">Temporally setting log level to: NONE</msg>
+<arg>name=LoginInput.Password</arg>
+<arg>${password}</arg>
+<doc>Types the given password into the text field identified by ``locator``.</doc>
+<status status="PASS" start="2026-04-16T21:57:33.163678" elapsed="0.064769"/>
+</kw>
+<kw name="Click Element" owner="SeleniumLibrary">
+<msg time="2026-04-16T21:57:33.228975" level="INFO">Clicking element 'id=loginButton'.</msg>
+<arg>id=loginButton</arg>
+<doc>Click the element identified by ``locator``.</doc>
+<status status="PASS" start="2026-04-16T21:57:33.228615" elapsed="0.050098"/>
+</kw>
+<doc>login - for all TC</doc>
+<status status="PASS" start="2026-04-16T21:57:24.482739" elapsed="8.796111"/>
+</kw>
+<kw name="Select Company">
+<kw name="Wait Until Element Is Visible" owner="SeleniumLibrary">
+<arg>xpath=//input[@placeholder='Αναζήτηση εταιρίας μέσω ΑΦΜ']</arg>
+<arg>timeout=10s</arg>
+<doc>Waits until the element ``locator`` is visible.</doc>
+<status status="PASS" start="2026-04-16T21:57:33.279427" elapsed="2.219488"/>
+</kw>
+<kw name="Clear Element Text" owner="SeleniumLibrary">
+<arg>xpath=//input[@placeholder='Αναζήτηση εταιρίας μέσω ΑΦΜ']</arg>
+<doc>Clears the value of the text-input-element identified by ``locator``.</doc>
+<status status="PASS" start="2026-04-16T21:57:35.499090" elapsed="0.028820"/>
+</kw>
+<kw name="Input Text" owner="SeleniumLibrary">
+<msg time="2026-04-16T21:57:35.528447" level="INFO">Typing text '135952929' into text field 'xpath=//input[@placeholder='Αναζήτηση εταιρίας μέσω ΑΦΜ']'.</msg>
+<arg>xpath=//input[@placeholder='Αναζήτηση εταιρίας μέσω ΑΦΜ']</arg>
+<arg>${companyTIN1}</arg>
+<doc>Types the given ``text`` into the text field identified by ``locator``.</doc>
+<status status="PASS" start="2026-04-16T21:57:35.528076" elapsed="0.064231"/>
+</kw>
+<kw name="Wait Until Element Is Enabled" owner="SeleniumLibrary">
+<arg>xpath=//button[@data-variant='outline' and .//span[text()='Αναζήτηση']]</arg>
+<arg>timeout=5s</arg>
+<doc>Waits until the element ``locator`` is enabled.</doc>
+<status status="PASS" start="2026-04-16T21:57:35.592491" elapsed="0.023436"/>
+</kw>
+<kw name="Click Button" owner="SeleniumLibrary">
+<msg time="2026-04-16T21:57:35.616439" level="INFO">Clicking button 'xpath=//button[@data-variant='outline' and .//span[text()='Αναζήτηση']]'.</msg>
+<arg>xpath=//button[@data-variant='outline' and .//span[text()='Αναζήτηση']]</arg>
+<doc>Clicks the button identified by ``locator``.</doc>
+<status status="PASS" start="2026-04-16T21:57:35.616090" elapsed="0.063513"/>
+</kw>
+<kw name="Sleep" owner="BuiltIn">
+<msg time="2026-04-16T21:57:38.680825" level="INFO">Slept 3 seconds.</msg>
+<arg>3s</arg>
+<doc>Pauses the test executed for the given time.</doc>
+<status status="PASS" start="2026-04-16T21:57:35.679792" elapsed="3.002264"/>
+</kw>
+<kw name="Wait Until Element Is Visible" owner="SeleniumLibrary">
+<arg>xpath=//button[@data-slot="button" and contains(., "Επιλογή")]</arg>
+<arg>timeout=5s</arg>
+<doc>Waits until the element ``locator`` is visible.</doc>
+<status status="PASS" start="2026-04-16T21:57:38.682653" elapsed="0.020576"/>
+</kw>
+<kw name="Click Element" owner="SeleniumLibrary">
+<msg time="2026-04-16T21:57:38.703971" level="INFO">Clicking element 'xpath=//button[@data-slot="button" and contains(., "Επιλογή")]'.</msg>
+<arg>xpath=//button[@data-slot="button" and contains(., "Επιλογή")]</arg>
+<doc>Click the element identified by ``locator``.</doc>
+<status status="PASS" start="2026-04-16T21:57:38.703434" elapsed="0.041624"/>
+</kw>
+<kw name="Sleep" owner="BuiltIn">
+<msg time="2026-04-16T21:57:40.746302" level="INFO">Slept 2 seconds.</msg>
+<arg>2s</arg>
+<doc>Pauses the test executed for the given time.</doc>
+<status status="PASS" start="2026-04-16T21:57:38.745257" elapsed="2.001536"/>
+</kw>
+<kw name="Wait Until Element Is Visible" owner="SeleniumLibrary">
+<arg>xpath=//li[@data-sonner-toast]//div[contains(text(), "Η εταιρεία") and contains(text(), "επιλέχθηκε")]</arg>
+<arg>timeout=10s</arg>
+<doc>Waits until the element ``locator`` is visible.</doc>
+<status status="PASS" start="2026-04-16T21:57:40.747055" elapsed="0.022014"/>
+</kw>
+<arg>${companyTIN1}</arg>
+<status status="PASS" start="2026-04-16T21:57:33.279013" elapsed="7.490205"/>
+</kw>
+<kw name="Close Browser" owner="SeleniumLibrary" type="TEARDOWN">
+<doc>Closes the current browser.</doc>
+<status status="PASS" start="2026-04-16T21:57:40.769391" elapsed="2.457149"/>
+</kw>
+<status status="PASS" start="2026-04-16T21:57:24.481006" elapsed="18.745705"/>
+</test>
+<doc>Hotdog</doc>
+<status status="PASS" start="2026-04-16T21:56:38.594211" elapsed="64.634323"/>
 </suite>
-<status status="FAIL" start="2026-04-13T20:51:44.448201" elapsed="9.022823"/>
+<status status="PASS" start="2026-04-16T21:56:38.591928" elapsed="64.638033"/>
 </suite>
-<status status="FAIL" start="2026-04-13T20:51:44.367354" elapsed="9.105767"/>
+<status status="PASS" start="2026-04-16T21:56:38.540675" elapsed="64.690763"/>
 </suite>
 <statistics>
 <total>
-<stat pass="0" fail="1" skip="0">All Tests</stat>
+<stat pass="4" fail="0" skip="0">All Tests</stat>
 </total>
 <tag>
 </tag>
 <suite>
-<stat name="PythonProject" id="s1" pass="0" fail="1" skip="0">PythonProject</stat>
-<stat name="Automation" id="s1-s1" pass="0" fail="1" skip="0">PythonProject.Automation</stat>
-<stat name="openWebsite" id="s1-s1-s1" pass="0" fail="1" skip="0">PythonProject.Automation.openWebsite</stat>
+<stat name="PythonProject" id="s1" pass="4" fail="0" skip="0">PythonProject</stat>
+<stat name="Automation" id="s1-s1" pass="4" fail="0" skip="0">PythonProject.Automation</stat>
+<stat name="Hotdog" id="s1-s1-s1" pass="4" fail="0" skip="0">PythonProject.Automation.Hotdog</stat>
 </suite>
 </statistics>
 <errors>
-<msg time="2026-04-13T20:51:53.442023" level="WARN">Keyword 'Capture Page Screenshot' could not be run on failure: Message: invalid session id; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidsessionidexception
-Stacktrace:
-	chromedriver!GetHandleVerifier [0x7ff724230295+146d5]
-	chromedriver!GetHandleVerifier [0x7ff724230300+14740]
-	chromedriver!(No symbol) [0x7ff723f9d5b6]
-	chromedriver!(No symbol) [0x7ff723fe8093]
-	chromedriver!(No symbol) [0x7ff72401fe72]
-	chromedriver!(No symbol) [0x7ff72401a0d1]
-	chromedriver!(No symbol) [0x7ff724019383]
-	chromedriver!(No symbol) [0x7ff723f660b5]
-	chromedriver!GetHandleVerifier [0x7ff724545949+329d89]
-	chromedriver!GetHandleVerifier [0x7ff72453fe96+3242d6]
-	chromedriver!GetHandleVerifier [0x7ff724563102+347542]
-	chromedriver!GetHandleVerifier [0x7ff72424d425+31865]
-	chromedriver!GetHandleVerifier [0x7ff72425605c+3a49c]
-	chromedriver!(No symbol) [0x7ff723f64e4a]
-	chromedriver!GetHandleVerifier [0x7ff7246a2118+486558]
-	KERNEL32!BaseThreadInitThunk [0x7ff927c7259d+1d]
-	ntdll!RtlUserThreadStart [0x7ff929f8af78+28]
-</msg>
 </errors>
 </robot>

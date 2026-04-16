@@ -22,7 +22,7 @@ Open My Browser
     Call Method    ${options}    add_argument    --window-size\=1920,1080
     # Αν χρησιμοποιείς SeleniumLibrary:
     Create Webdriver    Chrome    options=${options}
-    Go To    ${URL}
+    Go To    ${urlHotdog}
 
 Do Login
     [Documentation]    login - for all TC

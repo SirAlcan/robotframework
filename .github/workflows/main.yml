@@ -25,9 +25,9 @@ jobs:
           pip install -r requirements.txt
       - name: Run Robot Framework Tests
         run: |
-          rm -rf results        # Διαγράφει τον παλιό φάκελο αν υπάρχει
-          mkdir results         # Φτιάχνει καθαρό φάκελο
-          robot --outputdir results Automation/Hotdog.robot
+            mkdir -p results
+            # Προσθέτουμε τη μεταβλητή BROWSER:headlesschrome
+            robot --variable BROWSER:headlesschrome --outputdir results Automation/Hotdog.robot
       - name: Upload Test Reports
         if: always() # Θέλουμε το report ακόμα και αν αποτύχουν τα τεστ
         uses: actions/upload-artifact@v4

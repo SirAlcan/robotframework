@@ -25,9 +25,10 @@ jobs:
           pip install -r requirements.txt
 
       - name: Run Robot Framework Tests
-        run: |
-          mkdir results
-          robot --outputdir results automation/Hotdog.robot/  # Άλλαξε το "tests/" με τον φάκελο των τεστ σου
+      - run: |
+            rm -rf results        # Διαγράφει τον παλιό φάκελο αν υπάρχει
+            mkdir results         # Φτιάχνει καθαρό φάκελο
+            robot --outputdir results automation/Hotdog.robot/
 
       - name: Upload Test Reports
         if: always() # Θέλουμε το report ακόμα και αν αποτύχουν τα τεστ

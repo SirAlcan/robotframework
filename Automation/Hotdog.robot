@@ -8,7 +8,7 @@ Library  SeleniumLibrary
 
 *** Variables ***
 ${urlHotdog}    https://hotdoc.impact.gr/
-${Browser1}    Chrome
+${Browser1}    headlesschrome
 ${userEmail1}    gregkazakou@gmail.com
 ${pwd1}    Papaki2!
 ${companyTIN1}    135952929

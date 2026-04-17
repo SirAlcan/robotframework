@@ -34,20 +34,74 @@ jobs:
         with:
           name: robot-framework-reports
           path: results/
+      - name: Parse Test Results
+        if: always()
+        run: |
+            python3 << 'EOF'
+            import xml.etree.ElementTree as ET
+            
+            tree = ET.parse('results/output.xml')
+            root = tree.getroot()
+            
+            stats = root.find('.//total/stat')
+            total_pass = stats.get('pass')
+            total_fail = stats.get('fail')
+            total_skip = stats.get('skip')
+            
+            test_details = []
+            for test in root.findall('.//test'):
+             name = test.get('name')
+             status = test.find('status')
+             result = status.get('status')
+             elapsed = float(status.get('elapsed', 0))
+             elapsed_str = f"{elapsed:.2f}s"
+            
+             if result == 'PASS':
+                 icon = '✅'
+             elif result == 'FAIL':
+                 icon = '❌'
+             else:
+                 icon = '⏭️'
+            
+             message = ''
+             if result == 'FAIL':
+                 message = f"\n      Σφάλμα: {status.get('message', 'N/A')[:200]}"
+            
+             test_details.append(f"  {icon} {name} ({elapsed_str}){message}")
+            
+            details = '\n'.join(test_details)
+            
+            body = f"""
+            ╔══════════════════════════════════════╗
+              🤖 Robot Framework Test Report
+            ╚══════════════════════════════════════╝
+            
+            📊 ΣΥΝΟΛΙΚΑ ΑΠΟΤΕΛΕΣΜΑΤΑ:
+            ✅ Passed : {total_pass}
+            ❌ Failed : {total_fail}
+            ⏭️ Skipped: {total_skip}
+            
+            📋 ΑΝΑΛΥΤΙΚΑ ΑΝΑ TEST CASE:
+            {details}
+            
+            🔗 Πλήρες Report:
+            https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+            """
+            
+            with open('email_body.txt', 'w', encoding='utf-8') as f:
+             f.write(body)
+            EOF
+
       - name: Send Email Report
         if: always()
         uses: dawidd6/action-send-mail@v3
         with:
-            server_address: smtp.gmail.com
-            server_port: 465
-            username: ${{ secrets.EMAIL_USERNAME }}
-            password: ${{ secrets.EMAIL_PASSWORD }}
-            to: ${{ secrets.EMAIL_TO }}
-            from: GitHub Actions <${{ secrets.EMAIL_USERNAME }}>
-            subject: "🤖 Robot Framework Report - ${{ job.status }}"
-            body: |
-              Αποτελέσματα τεστ για το Hotdog project:
-              
-              ✅ Status: ${{ job.status }}
-              🔗 Report: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
-            attachments: results/output.xml
+                server_address: smtp.gmail.com
+                server_port: 465
+                username: ${{ secrets.EMAIL_USERNAME }}
+                password: ${{ secrets.EMAIL_PASSWORD }}
+                to: gregkazakou@gmail.com, colleague@gmail.com
+                from: GitHub Actions <${{ secrets.EMAIL_USERNAME }}>
+                subject: "🤖 Hotdog Test Report - ${{ job.status }}"
+                body_path: email_body.txt
+                attachments: results/output.xml, results/log.html, results/report.html

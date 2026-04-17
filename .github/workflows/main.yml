@@ -3,7 +3,8 @@ on:
   push:
     branches: [ main ]  # Τρέχει όταν κάνεις push στη main
   schedule:
-    - cron: '0 0 * * *'  # Αυτόματο τρέξιμο κάθε μεσάνυχτα
+    - cron: '0 6 * * *'  # Αυτόματο τρέξιμο κάθε μεσάνυχτα
+    - cron: '0 14 * * *'
   workflow_dispatch:      # Επιτρέπει χειροκίνητο τρέξιμο
 
 jobs:
@@ -33,3 +34,20 @@ jobs:
         with:
           name: robot-framework-reports
           path: results/
+      - name: Send Email Report
+        if: always()
+        uses: dawidd6/action-send-mail@v3
+        with:
+            server_address: smtp.gmail.com
+            server_port: 465
+            username: ${{ secrets.EMAIL_USERNAME }}
+            password: ${{ secrets.EMAIL_PASSWORD }}
+            to: ${{ secrets.EMAIL_TO }}
+            from: GitHub Actions <${{ secrets.EMAIL_USERNAME }}>
+            subject: "🤖 Robot Framework Report - ${{ job.status }}"
+            body: |
+              Αποτελέσματα τεστ για το Hotdog project:
+              
+              ✅ Status: ${{ job.status }}
+              🔗 Report: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+            attachments: results/output.xml

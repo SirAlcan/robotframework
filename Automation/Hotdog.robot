@@ -15,9 +15,7 @@ Do Login
     [Arguments]    ${email}=${userEmail1}    ${password}=${pwd1}
     Open Browser              ${urlHotdog}    ${Browser1}
     Sleep                     2s
-    # JS click για να παρακαμφθεί το SVG overlay σε headless mode
-    Wait Until Element Is Visible    xpath=//button[.//span[text()='Σύνδεση']]    timeout=10s
-    Execute Javascript    document.evaluate("//button[.//span[text()='Σύνδεση']]", document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.click()
+    Click Element             xpath=//a[@href='/auth/login']
     Sleep                     4s
     Element Should Be Disabled    id=loginButton
     Input Text                id=emailInput             ${email}

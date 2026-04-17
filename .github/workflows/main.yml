@@ -29,8 +29,8 @@ jobs:
 
       - name: Run Robot Framework Tests
         run: |
-          mkdir -p results
-          robot --outputdir results Automation/Hotdog.robot
+            mkdir -p results
+            robot --variable HEADLESS:True --outputdir results Automation/Hotdog.robot
 
       - name: Upload Test Reports
         if: always()

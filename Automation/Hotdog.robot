@@ -10,10 +10,11 @@ ${pwd1}           Papaki2!
 ${companyTIN1}    135952929
 
 *** Keywords ***
+*** Keywords ***
 Do Login
     [Documentation]    login - for all TC
     [Arguments]    ${email}=${userEmail1}    ${password}=${pwd1}
-    Open Browser              ${urlHotdog}    ${Browser1}
+    Open Browser    ${urlHotdog}    Chrome    options=add_argument("--headless");add_argument("--no-sandbox");add_argument("--disable-dev-shm-usage");add_argument("--disable-gpu");add_argument("--window-size=1920,1080")
     Sleep                     2s
     Click Element             xpath=//a[@href='/auth/login']
     Sleep                     4s

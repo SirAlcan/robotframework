@@ -1,35 +1,23 @@
 *** Settings ***
 Documentation   Hotdog
-Library  SeleniumLibrary
-#Test Setup   Open the url
-#Test Teardown  Close Browser
-#Resource  resource.robot
-
+Library         SeleniumLibrary
 
 *** Variables ***
-${urlHotdog}    https://hotdoc.impact.gr/
-${Browser1}    headlesschrome
-${userEmail1}    gregkazakou@gmail.com
-${pwd1}    Papaki2!
+${urlHotdog}      https://hotdoc.impact.gr/
+${Browser1}       Chrome
+${userEmail1}     gregkazakou@gmail.com
+${pwd1}           Papaki2!
 ${companyTIN1}    135952929
 
 *** Keywords ***
-Open My Browser
-    ${options}=    Evaluate    sys.modules['selenium.webdriver'].ChromeOptions()    sys, selenium.webdriver
-    Call Method    ${options}    add_argument    --headless
-    Call Method    ${options}    add_argument    --no-sandbox
-    Call Method    ${options}    add_argument    --disable-dev-shm-usage
-    Call Method    ${options}    add_argument    --window-size\=1920,1080
-    # Αν χρησιμοποιείς SeleniumLibrary:
-    Create Webdriver    Chrome    options=${options}
-    Go To    ${urlHotdog}
-
 Do Login
     [Documentation]    login - for all TC
     [Arguments]    ${email}=${userEmail1}    ${password}=${pwd1}
-    Open Browser              ${urlHotdog}              ${Browser1}
+    Open Browser              ${urlHotdog}    ${Browser1}
     Sleep                     2s
-    Click Button              Σύνδεση
+    # JS click για να παρακαμφθεί το SVG overlay σε headless mode
+    Wait Until Element Is Visible    xpath=//button[.//span[text()='Σύνδεση']]    timeout=10s
+    Execute Javascript    document.evaluate("//button[.//span[text()='Σύνδεση']]", document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.click()
     Sleep                     4s
     Element Should Be Disabled    id=loginButton
     Input Text                id=emailInput             ${email}
@@ -38,18 +26,16 @@ Do Login
 
 Select Company
     [Arguments]    ${companyTIN1}
-    # Περιμένουμε το πεδίο αναζήτησης
     Wait Until Element Is Visible    xpath=//input[@placeholder='Αναζήτηση εταιρίας μέσω ΑΦΜ']    timeout=10s
     Clear Element Text               xpath=//input[@placeholder='Αναζήτηση εταιρίας μέσω ΑΦΜ']
-    Input Text                      xpath=//input[@placeholder='Αναζήτηση εταιρίας μέσω ΑΦΜ']    ${companyTIN1}
+    Input Text                       xpath=//input[@placeholder='Αναζήτηση εταιρίας μέσω ΑΦΜ']    ${companyTIN1}
     Wait Until Element Is Enabled    xpath=//button[@data-variant='outline' and .//span[text()='Αναζήτηση']]    timeout=5s
-    Click Button                     xpath=//button[@data-variant='outline' and .//span[text()='Αναζήτηση']]
+    Execute Javascript    document.evaluate("//button[@data-variant='outline' and .//span[text()='Αναζήτηση']]", document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.click()
     Sleep    3s
     Wait Until Element Is Visible    xpath=//button[@data-slot="button" and contains(., "Επιλογή")]    timeout=5s
-    Click Element                    xpath=//button[@data-slot="button" and contains(., "Επιλογή")]
+    Execute Javascript    document.evaluate("//button[@data-slot='button' and contains(., 'Επιλογή')]", document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.click()
     Sleep    2s
     Wait Until Element Is Visible    xpath=//li[@data-sonner-toast]//div[contains(text(), "Η εταιρεία") and contains(text(), "επιλέχθηκε")]    timeout=10s
-
 
 *** Test Cases ***
 TC1 Login Success
@@ -73,10 +59,3 @@ TC4 Select Company Success
     [Setup]    Do Login
     Select Company    ${companyTIN1}
     [Teardown]    Close Browser
-
-
-
-
-
-
-

@@ -3,8 +3,13 @@
 Documentation    Test case  to Authentication/login
 Library  RequestsLibrary
 Library  collections
-Resource  resource.robot
+
 *** Variables ***
+${uatAPI}         https://einvoiceapiuat.impact.gr
+${INVOICE_PATH}     /Invoice/json
+${API_KEY}          03ac2ca0-2815-41eb-894f-9d3a80c6c9da
+${issuerTIN}             EL154697391
+${ERP}              FAKE_IAPR_TIMEOUT    # Override από CLI ή GitHub Actions matrix
 
 *** Test Cases ***
 Authentication/login

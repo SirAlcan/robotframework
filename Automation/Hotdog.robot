@@ -23,6 +23,8 @@ Do Login
     Sleep    4s
     Element Should Be Disabled    id=loginButton
     Input Text        id=emailInput             ${email}
+    Click Element     id=loginButton
+    Sleep    100ms
     Input Password    name=LoginInput.Password  ${password}
     Click Element     id=loginButton
 

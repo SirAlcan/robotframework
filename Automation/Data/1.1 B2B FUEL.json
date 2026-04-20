@@ -1,0 +1,182 @@
+{
+    "IsDelayedCode": 0,
+    "iaprSignPolicy": 2,
+    "CurrencyCode": "EUR",
+    "InvoiceType": "Sales Invoice (1.1)",
+    "InvoiceTypeCode": "1.1",
+    "DocumentTypeCode": "ERPEINVOICE",
+    "OrderNumber": "ORDER01{{incrementalCounter}}",
+    "Series": "B2B1.3",
+    "Number": "{{incrementalCounter}}",
+    "DateIssued": "{{currentdate}}",
+    "dispatchAdvice": "1st Relative document descriptions",
+    "RelativeDocuments": [
+        "Relative Documents descriptions"
+    ],
+    "correlatedInvoices": [],
+    "multipleConnectedMarks": [],
+    "deliveryNoteMarks": [],
+    "isReverseDeliveryNote": false,
+    "isDeliveryNote": false,
+    "isFuelInvoice": true,
+    "contractOrderDetails": {
+        "orderNumbers": [
+            "ORDER01{{orderNumbers-BT13}}"
+        ]
+    },
+    "Issuer": {
+        "RegisteredName": "issuer's name",
+        "BrandName": "issuer's brand",
+        "contactPerson": "Issuer Contact Person",
+        "Vat": "{{vat1}}",
+        "TaxOffice": "issuer's Tax Office",
+        "Phones": [
+            "2000000000"
+        ],
+        "Faxes": [
+            "2000000000"
+        ],
+        "Address": {
+            "CountryCode": "GR",
+            "City": "issuer's city",
+            "Street": "issuer's street",
+            "Number": "issuer's number",
+            "Postal": "issuer's postal code"
+        },
+        "BranchCode": 0
+    },
+    "CounterParty": {
+        "RegisteredName": "CounterParty name",
+        "BrandName": "CounterParty brand",
+        "contactPerson": "CounterParty Contact Person",
+        "Vat": "EL118058830",
+        "TaxOffice": "CounterParty Tax Office",
+        "Phones": [
+            "200000000"
+        ],
+        "Address": {
+            "CountryCode": "GR",
+            "City": "CounterParty city",
+            "Street": "CounterParty street",
+            "Number": "CounterParty number",
+            "Postal": "CounterParty postal code"
+        },
+        "BranchCode": 0
+    },
+    "transporter": {
+        "RegisteredName": "Transporter",
+        "Vat": "EL801694306",
+        "Address": {
+            "CountryCode": "GR",
+            "City": "city",
+            "Street": "street",
+            "Number": "number",
+            "Postal": "postal code"
+        },
+        "BranchCode": 0
+    },
+    "DistributionDetails": {
+        "InternalDocumentId": "ERP_Unique_DocumentId{{incrementalCounter}}{{currentdate}}"
+    },
+    "PaymentDetails": {
+        "paymentDate": "{{currentdate}}",
+        "TransactionPaymentTerms": "Due at end of next 2 months",
+        "PreviousBalance": 3793888.27,
+        "NewBalance": 3802497.93,
+        "ElectronicPaymentCode": null,
+        "OtherPaymentDetails": "in 90 days",
+        "exchangeCurrencyRate": 1.00000,
+        "PaymentMethods": [
+            {
+                "PaymentMethodType": "ON CREDIT",
+                "PaymentMethodTypeCode": 5,
+                "amount": 3548.88,
+                "remarks": "Bank transfer in 90 days"
+            }
+        ],
+        "PaymentTerms": [
+            {
+                "PaymentDate": "2026-12-01T00:00:00",
+                "Amount": 3000.00
+            },
+            {
+                "PaymentDate": "2026-12-15T00:00:00",
+                "Amount": 548.88
+            }
+        ]
+    },
+    "AdditionalDetails": {
+        "TransmissionMethod": "E",
+        "accountingDepartmentEmails": [
+            "email@impact.gr"
+        ],
+        "documentTemplate": "",
+        "customerCellNumbers": [
+            "+30000000000"
+        ],
+        "sendAsPdf": false,
+        "pdfNotificationEmails": [
+            "email@impact.gr"
+        ],
+        "DocumentTags": [
+            "B2B",
+            "1.3",
+            "Fuel"
+        ]
+    },
+    "details": [
+        {
+            "lineNo": 1,
+            "code": "000001",
+            "itemCodification": "Barcode",
+            "descriptions": [
+                "Item descriptions"
+            ],
+            "remarks": "Item remarks",
+            "fuelCode": 21,
+            "MeasurementUnit": "LT",
+            "MeasurementUnitCode": 3,
+            "quantity": 100.00,
+            "quantityIn15Deg": 94.00,
+            "measurementUnitCodeEN": "TO",
+            "quantityEN": 0.100,
+            "unitPrice": 28.62,
+            "netTotal": 2862.00,
+            "total": 3548.88,
+            "vatTotal": 686.88,
+            "vatCategory": "24%",
+            "vatCategoryCode": 1,
+            "vatExemptionCategoryCode": 0,
+            "vatExemptionCategory": "vatExemption Reason",
+            "IsInformative": false,
+            "IsHidden": false,
+            "noVat": false,
+            "RecordTypeCode": 0,
+            "IncomeClassification": {
+                "ClassificationTypeCode": "E3_561_001",
+                "ClassificationCategoryCode": "category1_1",
+                "amount": 2862.00
+            }
+        }
+    ],
+    "Summaries": {
+        "totalCatalogNetAmount": 2862.00,
+        "totalNetAmountAfterLineDiscounts": 0.00,
+        "TotalNetAmount": 2862.00,
+        "TotalVATAmount": 686.88,
+        "TotalGrossValue": 3548.88,
+        "totalPayableAmount": 3548.88
+    },
+    "VatAnalysis": [
+        {
+            "Name": "24%",
+            "Percentage": 24,
+            "VatAmount": 686.88,
+            "UnderlyingValue": 2862
+        }
+    ],
+    "MiscellaneousData": {
+        "Comments1": "No VAT - Article 29 of the VAT Code",
+        "Comments2": "Issuer Remarks"
+    }
+}

@@ -1,0 +1,145 @@
+{
+    "erpSource": "SAP",
+    "IsDelayedCode": 0,
+    "specialInvoiceCategory": 0,
+    "CurrencyCode": "EUR",
+    "InvoiceType": "Sales Invoice",
+    "InvoiceTypeCode": "1.1",
+    "DocumentType": "Sales Invoice",
+    "DocumentTypeCode": "INVOICE",
+    "OrderNumber": "{{incrementalCounter}}",
+    "Series": "B2B",
+    "Number": "{{incrementalCounter}}",
+    "DateIssued": "{{currentdate}}",
+    "isReverseDeliveryNote": false,
+    "isDeliveryNote": false,
+    "selfPricing": false,
+    "isFuelInvoice": false,
+    "vatPaymentSuspension": false,
+    "Issuer": {
+        "RegisteredName": "issuer's name",
+        "Vat": "{{vat1}}",
+        "TaxOffice": "issuer's Tax Office",
+        "contactPerson": "issuer' Contact Person",
+        "Phones": [
+            "2000000000"
+        ],
+        "Faxes": [
+            "2000000000"
+        ],
+        "Address": {
+            "CountryCode": "GR",
+            "City": "issuer's city",
+            "Street": "issuer's street",
+            "Number": "issuer's number",
+            "Postal": "issuer's postal code"
+        },
+        "BranchCode": 0
+    },
+    "CounterParty": {
+        "RegisteredName": "counter party's Name",
+        "Vat": "EL118058830",
+        "TaxOffice": "counter party's Tax Office",
+        "contactPerson": "counter party's Contact Person",
+        "Phones": [
+            "20000000"
+        ],
+        "Address": {
+            "CountryCode": "GR",
+            "City": "counter party's city",
+            "Street": "counter party's street",
+            "Number": "counter party's number",
+            "Postal": "counter party's postal code"
+        },
+        "BranchCode": 0
+    },
+    "DistributionDetails": {
+        "InternalDocumentId": "ERP_Unique_DocumentId{{incrementalCounter}}{{currentdate}}"
+    },
+    "PaymentDetails": {
+        "paymentDate": "{{currentdate}}",
+        "exchangeCurrencyRate": 1.00000,
+        "PaymentMethods": [
+            {
+                "PaymentMethodType": "Domestic Payments Account Number",
+                "PaymentMethodTypeCode": 1,
+                "amount": 1500,
+                "remarks": "Account Number XXXX"
+            },
+            {
+                "PaymentMethodType": "Web Banking",
+                "PaymentMethodTypeCode": 6,
+                "amount": 500,
+                "remarks": "Web Banking XXXX"
+            },
+            {
+                "PaymentMethodType": "On Credit",
+                "PaymentMethodTypeCode": 5,
+                "amount": 1548.88,
+                "remarks": "On Credit in 90 days"
+            }
+        ]
+    },
+    "AdditionalDetails": {
+        "TransmissionMethod": "A",
+        "accountingDepartmentEmails": [
+            "gkazakou@impact.gr"
+        ],
+        "customerCellNumbers": [
+            "+30000000000"
+        ],
+        "sendAsPdf": false,
+        "pdfNotificationEmails": [
+            "gkazakou@impact.gr"
+        ],
+        "documentTemplate": null,
+        "DocumentTags": [
+            "transactionType=B2B",
+            "ERP=SAP"
+        ]
+    },
+    "Details": [
+        {
+            "LineNo": 1,
+            "Code": "289406",
+            "ItemCodification": "289406",
+            "Descriptions": [
+                "Product's specifications"
+            ],
+            "Remarks": "Product's comment's",
+            "MeasurementUnit": "Pieces",
+            "MeasurementUnitCode": 1,
+            "Quantity": 1.00,
+            "UnitPrice": 2862.00,
+            "NetTotal": 2862.00,
+            "Total": 3548.88,
+            "VATTotal": 686.88,
+            "VatCategory": "24%",
+            "VatCategoryCode": 1,
+            "VatExemptionCategory": null,
+            "VatExemptionCategoryCode": null,
+            "IsInformative": false,
+            "IsHidden": false,
+            "DiscountOption": false,
+            "NoVat": false,
+            "RecordTypeCode": 0,
+            "IncomeClassification": {
+                "ClassificationTypeCode": "E3_561_001",
+                "ClassificationCategoryCode": "category1_1"
+            }
+        }
+    ],
+    "Summaries": {
+        "TotalNetAmount": 2862.00,
+        "TotalVATAmount": 686.88,
+        "TotalGrossValue": 3548.88
+    },
+    "VatAnalysis": [
+        {
+            "Name": "24%",
+            "Percentage": 24,
+            "VatAmount": 686.88,
+            "UnderlyingValue": 2862
+        }
+    ]
+}

@@ -1,0 +1,104 @@
+{
+    "IsDelayedCode": 0,
+    "Currency": "EUR",
+    "CurrencyCode": "EUR",
+    "InvoiceType": "FNB Form 8.6",
+    "InvoiceTypeCode": "8.6",
+    "SpecialInvoiceCategory": 0,
+    "DocumentTypeCode": "INVOICE",
+    "totalCancelDeliveryOrders": false,
+    "Series": "FNB",
+    "number": "{{incrementalCounter}}",
+    "dateIssued": "{{currentdate}}",
+    "RelativeDocuments": [],
+    "correlatedInvoices": [],
+    "multipleConnectedMarks": [],
+    "OrderCode": "2",
+    "tableId": "20",
+    "Issuer": {
+        "RegisteredName": "issuer's name",
+        "Vat": "{{vat1}}",
+        "GeneralCommercialRegistryNumber": "00000000000",
+        "TaxOffice": "issuer's Tax Office",
+        "contactPerson": "issuer' Contact Person",
+        "Phones": [
+            "2000000000"
+        ],
+        "Faxes": [
+            "2000000000"
+        ],
+        "Address": {
+            "CountryCode": "GR",
+            "City": "issuer's city",
+            "Street": "issuer's street",
+            "Number": "issuer's number",
+            "Postal": "issuer's postal code"
+        },
+        "BranchCode": 0,
+        "Branch": "Main Branch"
+    },
+
+    "AdditionalDetails": {
+        "TransmissionMethod": "A",
+        "accountingDepartmentEmails": [
+            "gkazakou@impact.gr"
+        ],
+        "customerCellNumbers": [
+            "+30000000000"
+        ],
+        "sendAsPdf": false,
+        "pdfNotificationEmails": [
+            "gkazakou@impact.gr"
+        ],
+        "documentTemplate": null,
+        "DocumentTags": [
+            "transactionType=FNB",
+            "ERP=TEST"
+        ]
+    },
+    "DistributionDetails": {
+        "InternalDocumentId": "{{incrementalCounter}}",
+        "salesman": "Waiter Α1",
+        "content": "3"
+    },
+    "Details": [
+        {
+            "LineNo": 1,
+            "code": "251320104",
+            "Descriptions": [
+                "Product's specifications"
+            ],
+            "MeasurementUnitCode": 1,
+            "MeasurementUnit": "Pieces",
+            "Quantity": 100,
+            "UnitPrice": 1.09,
+            "allowancesTotal": 0.0,
+            "NetTotal": 109.73,
+            "VatCategory": "13",
+            "VatCategoryCode": 2,
+            "VATTotal": 14.27,
+            "Total": 124,
+            "IsInformative": false,
+            "IsHidden": false,
+            "RecordTypeCode": 0,
+            "noVat": true,
+            "IncomeClassification": {
+                "ClassificationTypeCode": "",
+                "ClassificationCategoryCode": "category1_95"
+            }
+        }
+    ],
+    "Summaries": {
+        "totalAllowances": 0.0,
+        "TotalNetAmount": 109.73,
+        "TotalVATAmount": 14.27,
+        "TotalGrossValue": 124
+    },
+    "VatAnalysis": [
+        {
+            "Percentage": 13.0,
+            "VatAmount": 5.8,
+            "UnderlyingValue": 109.73
+        }
+    ]
+}

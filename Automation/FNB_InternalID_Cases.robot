@@ -127,7 +127,6 @@ TC_A Fire All With 1sec Interval
 
     Log    ✅ Case A ολοκληρώθηκε!    console=yes
 
-*** Test Cases ***
 TC_B Fire All With 500ms Interval
     [Tags]    case_b_fire
     Generate Run Series Prefix

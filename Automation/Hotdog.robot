@@ -24,7 +24,7 @@ Do Login
     Element Should Be Disabled    id=loginButton
     Input Text        id=emailInput             ${email}
     Click Element     id=loginButton
-    Sleep    100ms
+    Sleep    4s
     Input Password    name=LoginInput.Password  ${password}
     Click Element     id=loginButton
 
@@ -101,7 +101,7 @@ Delete User
 *** Test Cases ***
 TC1 Login Success
     Do Login
-    Sleep    4s
+    Sleep   3s
     Close Browser
 
 TC2 Login Wrong Email

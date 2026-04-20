@@ -105,8 +105,8 @@ TC1 Login Success
     Close Browser
 
 TC2 Login Wrong Email
-    Do Login    email=invalid-email@email.com
-    Wait Until Element Is Visible    xpath=//div[@class='validation-message' and (normalize-space()='Check your email address' or normalize-space()='Έλεγξε τη διεύθυνση email σου')]
+    Do Login     email=invalid-email@email.com   password= ${pwd1}
+    Wait Until Element Is Visible  xpath=//div[@class='validation-message' and (normalize-space()='Ο κωδικός πρόσβασης δεν είναι σωστός' or normalize-space()='The password is incorrect')]     #xpath=//div[@class='validation-message' and (normalize-space()='Check your email address' or normalize-space()='Έλεγξε τη διεύθυνση email σου')]
     Sleep    3s
     Close Browser
 

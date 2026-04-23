@@ -82,7 +82,8 @@ Open Headless Browser
         Open Browser    ${urlHotdog}    ${Browser1}
     END
     Maximize Browser Window
-    Safe Click    ${LOGIN_LINK}
+    Wait Until Page Contains Element    ${LOGIN_LINK}    15s
+    Execute Javascript    document.querySelector('a[href="/auth/login"]').click()
 
 
 Open Browser To App

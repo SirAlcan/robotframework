@@ -22,7 +22,7 @@ ${SUCCESS_LOGIN_URL}    https://hotdoc.impact.gr/company/select?redirectUrl=/das
 ${USERNAME_FIELD}    id=emailInput
 ${PASSWORD_FIELD}    name=LoginInput.Password
 ${LOGIN_BUTTON}      id=loginButton
-
+${LOGIN_URL}    https://hotdoc.impact.gr/auth/login
 
 *** Keywords ***
 # ======================================
@@ -82,8 +82,8 @@ Open Headless Browser
         Open Browser    ${urlHotdog}    ${Browser1}
     END
     Maximize Browser Window
-    Wait Until Page Contains Element    ${LOGIN_LINK}    15s
-    Execute Javascript    document.querySelector('a[href="/auth/login"]').click()
+    Go To    ${urlHotdog}auth/login
+    Wait Until Page Contains Element    ${USERNAME_FIELD}    15s
 
 
 Open Browser To App

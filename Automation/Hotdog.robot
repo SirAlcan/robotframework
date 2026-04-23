@@ -76,8 +76,12 @@ Click Menu Item By Name
 # ======================================
 
 Open Headless Browser
-    Run Keyword If    '${HEADLESS}' == 'True'    Open Headless Browser
-    Run Keyword If    '${HEADLESS}' == 'False'   Open Browser    ${urlHotdog}    ${Browser1}
+    IF    '${HEADLESS}' == 'True'
+        Open Browser    ${urlHotdog}    ${Browser1}    options=add_argument("--headless")
+    ELSE
+        Open Browser    ${urlHotdog}    ${Browser1}
+    END
+    Maximize Browser Window
     Safe Click    ${LOGIN_LINK}
 
 

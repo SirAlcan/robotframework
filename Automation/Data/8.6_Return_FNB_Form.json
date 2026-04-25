@@ -7,7 +7,7 @@
     "SpecialInvoiceCategory": 0,
     "DocumentTypeCode": "INVOICE",
     "totalCancelDeliveryOrders": false,
-    "Series": "FNB",
+    "Series": "FNB-RETURN",
     "number": "{{incrementalCounter}}",
     "dateIssued": "{{currentdate}}",
     "RelativeDocuments": [],
@@ -58,7 +58,7 @@
         ]
     },
     "DistributionDetails": {
-        "InternalDocumentId": "{{incrementalCounter}}",
+        "InternalDocumentId": "InternalDocumentId1",
         "salesman": "Waiter Α1",
         "content": "3"
     },
@@ -100,11 +100,6 @@
             "Percentage": 13.0,
             "VatAmount": 5.8,
             "UnderlyingValue": 109.73
-        },
-        {
-            "Percentage": 24.0,
-            "VatAmount": 14.27,
-            "UnderlyingValue": 24.2
         }
     ]
 }

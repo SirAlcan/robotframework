@@ -6,7 +6,7 @@
     "SpecialInvoiceCategory": 12,
     "DocumentTypeCode": "INVOICE",
     "IsDeliveryNote": false,
-    "Series": "ΑΛΠ100",
+    "Series": "FNB-RETAIL",
     "number": "{{incrementalCounter}}",
     "dateIssued": "{{currentdate}}",
     "RelativeDocuments": [
@@ -52,7 +52,7 @@
     },
     "AllowancesCharges": [],
     "DistributionDetails": {
-        "InternalDocumentId": "{{incrementalCounter}}",
+        "InternalDocumentId": "InternalDocumentId1",
         "salesman": "Waiter Α1",
         "content": "3"
     },

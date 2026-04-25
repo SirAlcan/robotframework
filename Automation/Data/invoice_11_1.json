@@ -1,32 +1,25 @@
 {
     "IsDelayedCode": 0,
-    "Currency": "EUR",
     "CurrencyCode": "EUR",
-    "InvoiceType": "FNB Form 8.6",
-    "InvoiceTypeCode": "8.6",
+    "InvoiceType": "Retail Sales",
+    "InvoiceTypeCode": "11.1",
     "SpecialInvoiceCategory": 0,
     "DocumentTypeCode": "INVOICE",
-    "totalCancelDeliveryOrders": false,
-    "Series": "FNB-DEBIT",
-    "number": "{{incrementalCounter}}",
-    "dateIssued": "{{currentdate}}",
+    "IsDeliveryNote": false,
+    "Series": "ΑΛΠ100",
+    "number": "OVERWRITTEN",
+    "dateIssued": "OVERWRITTEN",
     "RelativeDocuments": [],
-    "correlatedInvoices": [],
     "multipleConnectedMarks": [],
     "OrderCode": "2",
-    "tableId": "20",
     "Issuer": {
         "RegisteredName": "issuer's name",
-        "Vat": "{{vat1}}",
+        "Vat": "EL154697391",
         "GeneralCommercialRegistryNumber": "00000000000",
         "TaxOffice": "issuer's Tax Office",
-        "contactPerson": "issuer' Contact Person",
-        "Phones": [
-            "2000000000"
-        ],
-        "Faxes": [
-            "2000000000"
-        ],
+        "contactPerson": "issuer's Contact Person",
+        "Phones": ["2000000000"],
+        "Faxes": ["2000000000"],
         "Address": {
             "CountryCode": "GR",
             "City": "issuer's city",
@@ -37,37 +30,54 @@
         "BranchCode": 0,
         "Branch": "Main Branch"
     },
-
-    "AdditionalDetails": {
-        "TransmissionMethod": "A",
-        "accountingDepartmentEmails": [
-            "gkazakou@impact.gr"
-        ],
-        "customerCellNumbers": [
-            "+30000000000"
-        ],
-        "sendAsPdf": false,
-        "pdfNotificationEmails": [
-            "gkazakou@impact.gr"
-        ],
-        "documentTemplate": null,
-        "DocumentTags": [
-            "transactionType=FNB",
-            "ERP=TEST"
+    "CounterParty": {
+        "RegisteredName": "RETAIL CUSTOMER",
+        "code": "0000065",
+        "Vat": "",
+        "Address": {
+            "CountryCode": null,
+            "Municipality": null,
+            "City": null,
+            "Street": null,
+            "number": null,
+            "Postal": null
+        },
+        "Branch": 0
+    },
+    "AllowancesCharges": [],
+    "DistributionDetails": {
+        "InternalDocumentId": "InternalDocumentId_AUTOTEST"
+    },
+    "PaymentDetails": {
+        "exchangeCurrencyRate": 1.00000,
+        "PaymentMethods": [
+            {
+                "PaymentMethodType": "Credit Card",
+                "PaymentMethodTypeCode": 7,
+                "Amount": 124,
+                "tipAmount": 0,
+                "transactionId": "OVERWRITTEN",
+                "providersSignature": "OVERWRITTEN",
+                "posInput": "OVERWRITTEN",
+                "terminalId": "16000198",
+                "remarks": "POS Credit Card"
+            }
         ]
     },
-    "DistributionDetails": {
-        "InternalDocumentId": "InternalDocumentId1",
-        "salesman": "Waiter Α1",
-        "content": "3"
+    "AdditionalDetails": {
+        "TransmissionMethod": "A",
+        "accountingDepartmentEmails": [],
+        "customerCellNumbers": [],
+        "sendAsPdf": false,
+        "pdfNotificationEmails": [],
+        "documentTemplate": null,
+        "DocumentTags": ["transactionType=POS", "invoice=11.1", "ERP=AUTOTEST"]
     },
     "Details": [
         {
             "LineNo": 1,
             "code": "251320104",
-            "Descriptions": [
-                "Product's specifications"
-            ],
+            "Descriptions": ["Product's specifications"],
             "MeasurementUnitCode": 1,
             "MeasurementUnit": "Pieces",
             "Quantity": 100,
@@ -100,5 +110,8 @@
             "VatAmount": 5.8,
             "UnderlyingValue": 109.73
         }
-    ]
+    ],
+    "MiscellaneousData": {
+        "Comments1": "Remarks about the invoice"
+    }
 }

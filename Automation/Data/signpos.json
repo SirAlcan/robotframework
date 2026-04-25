@@ -1,0 +1,16 @@
+{
+    "nspCode": "CommonWeb",
+    "issuerTin": "154697391",
+    "issueDate": "OVERWRITTEN",
+    "branchCode": 0,
+    "invoiceTypeCode": "11.1",
+    "series": "ΑΛΠ",
+    "identifier": "OVERWRITTEN",
+    "mark":null,
+    "paymentAmount": 124,
+    "totalNetAmount": 109.73,
+    "totalVatAmount": 14.27,
+    "totalAmount": 124,
+    "terminalId": "16000198",
+    "signatureDurationType": "H_24"
+}

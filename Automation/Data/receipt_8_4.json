@@ -1,0 +1,72 @@
+{
+    "isDelayedCode": 0,
+    "currency": "Euro",
+    "currencyCode": "EUR",
+    "series": "AEPOS-DEBIT",
+    "number": "OVERWRITTEN",
+    "dateIssued": "OVERWRITTEN",
+    "invoiceType": "POS Receipt",
+    "invoiceTypeCode": "8.4",
+    "documentTypeCode": "INVOICE",
+    "thirdPartyCollection": false,
+    "providerSignatureIdentifier": "OVERWRITTEN",
+    "exchangeCurrencyRate": 1.00000,
+    "totalAmount": 124,
+    "totalAmountAC": 0,
+    "Issuer": {
+        "RegisteredName": "issuer's name",
+        "Vat": "EL154697391",
+        "GeneralCommercialRegistryNumber": "00000000000",
+        "TaxOffice": "issuer's Tax Office",
+        "contactPerson": "issuer's Contact Person",
+        "Phones": ["2000000000"],
+        "Faxes": ["2000000000"],
+        "Address": {
+            "CountryCode": "GR",
+            "City": "issuer's city",
+            "Street": "issuer's street",
+            "Number": "issuer's number",
+            "Postal": "issuer's postal code"
+        },
+        "BranchCode": 0,
+        "Branch": "Main Branch"
+    },
+    "CounterParty": {
+        "RegisteredName": "RETAIL CUSTOMER",
+        "code": "0000065",
+        "Vat": "",
+        "Address": {
+            "CountryCode": "GR",
+            "Municipality": null,
+            "City": null,
+            "Street": null,
+            "number": null,
+            "Postal": null
+        },
+        "Branch": 0
+    },
+    "cardlines": [
+        {
+            "lineNo": 1,
+            "amount": 124,
+            "tipAmount": 0,
+            "transactionId": "OVERWRITTEN",
+            "providersSignature": "OVERWRITTEN",
+            "posInput": "OVERWRITTEN",
+            "terminalId": "160001208",
+            "remarks": "Credit Card",
+            "isInformative": false,
+            "isHidden": false
+        }
+    ],
+    "AdditionalDetails": {
+        "AccountingDepartmentEmails": [],
+        "TransmissionMethod": "A",
+        "AvoidEmailGrouping": false
+    },
+    "internalDocumentId": "InternalId_Receipt_AUTOTEST",
+    "miscellaneousData": {
+        "comments1": "remarks"
+    },
+    "multipleConnectedMarks": []
+}

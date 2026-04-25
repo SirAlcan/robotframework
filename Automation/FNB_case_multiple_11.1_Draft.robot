@@ -1,39 +1,10 @@
-*** Settings ***
-Documentation     FNB (Food & Beverage) Table Order Scenarios
-...               Ροή: 8.6 debit/credit/cancel -> MARKs συσσωρεύονται ανά τραπέζι.
-...               11.1 receipt κλείνει τα pending 8.6 MARKs μέσω multipleConnectedMarks.
-...               11.4 receipt είναι η retail πιστωτική (ίδιο schema με 11.1, διαφορετικός InvoiceTypeCode).
-...               Cancel 8.6 αφαιρεί MARKs από το pool και ΔΕΝ περιλαμβάνει ποσά.
-Library           RequestsLibrary
-Library           Collections
-Library           OperatingSystem
-Library           DateTime
-Library           String
-Suite Setup       Setup Suite
-Test Setup        Reset Pending Marks Pool
-
-*** Variables ***
-${BASE_URL}                https://einvoiceapiuat.impact.gr/invoice/json
-${TEMPLATE_8_6}            ${CURDIR}/Data/8.6_Debit_FNB_Form.json
-${TEMPLATE_8_6_CREDIT}     ${CURDIR}/Data/8.6_Return_FNB_Form.json
-${TEMPLATE_8_6_CANCEL}     ${CURDIR}/Data/8.6_Cancel_FNB_Form.json
-${TEMPLATE_11_1}           ${CURDIR}/Data/11.1_FNB_Retail_Sales_Receipt.json
-${TABLE_ID}                20
-${DEFAULT_VAT_RATE}        ${13}
-${PRODUCT_CODE}            251320104
-${ISSUER_VAT}              %{FNB_ISSUER_VAT=EL154697391}
-${API_KEY}                 03ac2ca0-2815-41eb-894f-9d3a80c6c9da
-${API_KEY_HEADER_PREFIX}   ${EMPTY}
-@{PENDING_MARKS}
-${DOC_COUNTER}             ${0}
-
 *** Test Cases ***
 Scenario 01 - Simple Close
     [Documentation]    8.6 debit 50 -> 11.1 debit 50
     Send 8.6 Debit     gross=50
     Send 11.1 Debit    gross=50    expected_marks_count=1
 
-Scenario 02 - Order With Return Before Payment
+Scenario 02 - Order With Return Before Payment    #check clearance
     [Documentation]    8.6 debit 100 -> 8.6 credit 20 -> 11.1 debit 80
     Send 8.6 Debit     gross=100
     Send 8.6 Credit    gross=20
@@ -51,20 +22,20 @@ Scenario 04 - Two Rounds Same Table
     Send 8.6 Debit     gross=30
     Send 11.1 Debit    gross=30    expected_marks_count=1
 
-Scenario 05 - Full Cancellation By Credit And New Order
+Scenario 05 - Full Cancellation By Credit And New Order    #check clearance
     [Documentation]    Πλήρης επιστροφή με 8.6 credit (όχι cancel) και νέα παραγγελία
     Send 8.6 Debit     gross=60
     Send 8.6 Credit    gross=60
     Send 8.6 Debit     gross=45
     Send 11.1 Debit    gross=45    expected_marks_count=3
 
-Scenario 06 - Return After Receipt With 11 4
+Scenario 06 - Return After Receipt With 11 4    #check clearance
     [Documentation]    8.6 debit 50 -> 11.1 debit 50 -> 11.4 credit 10 για επιστροφή
     Send 8.6 Debit     gross=50
     Send 11.1 Debit    gross=50    expected_marks_count=1
     Send 11.4 Credit   gross=10    expected_marks_count=0
 
-Scenario 07 - Mixed Complex Flow
+Scenario 07 - Mixed Complex Flow    #check clearance
     [Documentation]    Το σύνθετο σενάριο με 9 βήματα (το τελευταίο είναι 11.4 πιστωτική)
     Send 8.6 Debit     gross=10        # M1
     Send 8.6 Debit     gross=30        # M2
@@ -82,11 +53,11 @@ Scenario 08 - Split Bill
     Send 11.1 Debit    gross=40    expected_marks_count=1    close_all_pending=False
     Send 11.1 Debit    gross=40    expected_marks_count=1    close_all_pending=True
 
-Scenario 09 - Partial Payment Then New Order
+Scenario 09 - Partial Payment Then New Order    #fix
     Send 8.6 Debit     gross=80
-    Send 11.1 Debit    gross=50    expected_marks_count=1
+    Send 11.1 Debit    gross=50    expected_marks_count=1    close_all_pending=${False}
     Send 8.6 Debit     gross=25
-    Send 11.1 Debit    gross=55    expected_marks_count=1
+    Send 11.1 Debit    gross=55    expected_marks_count=2    
 
 Scenario 10 - Mixed VAT Rates
     [Documentation]    Κινήσεις με διαφορετικούς συντελεστές ΦΠΑ στο ίδιο τραπέζι
@@ -130,19 +101,54 @@ Scenario 14 - Cancel Mixed Flow
 Scenario 15 - Zero Value Receipt Close
     [Documentation]    Balance του τραπεζιού = 0 (π.χ. comp meal, 8.6 debit = 8.6 credit).
     ...                Πρέπει να εκδοθεί 11.1 με gross=0 για να κλείσουν τα MARKs στον κόμβο.
-    Send 8.6 Debit     gross=50
-    Send 8.6 Credit    gross=50
-    Send 11.1 Debit    gross=0     vat_rate=${0}    expected_marks_count=2
+    ...                Το vat_rate διατηρείται ίδιο με τα 8.6 (13%), ώστε VatCategoryCode=2.
+    Send 8.6 Debit     gross=50    vat_rate=${13}
+    Send 8.6 Credit    gross=50    vat_rate=${13}
+    Send 11.1 Debit    gross=0     vat_rate=${13}    expected_marks_count=2
     Pool Should Be Empty
 
 Scenario 16 - Zero After Multiple Offsetting Moves
-    [Documentation]    Πολλαπλές κινήσεις που ακυρώνονται μεταξύ τους
-    Send 8.6 Debit     gross=30
-    Send 8.6 Debit     gross=20
-    Send 8.6 Credit    gross=30
-    Send 8.6 Credit    gross=20
-    Send 11.1 Debit    gross=0     vat_rate=${0}    expected_marks_count=4
+    [Documentation]    Πολλαπλές κινήσεις που ακυρώνονται μεταξύ τους. Τα 8.6 είναι 13%,
+    ...                άρα το μηδενικό 11.1 πρέπει επίσης να φέρει VatCategoryCode=2.
+    Send 8.6 Debit     gross=30    vat_rate=${13}
+    Send 8.6 Debit     gross=20    vat_rate=${13}
+    Send 8.6 Credit    gross=30    vat_rate=${13}
+    Send 8.6 Credit    gross=20    vat_rate=${13}
+    Send 11.1 Debit    gross=0     vat_rate=${13}    expected_marks_count=4
     Pool Should Be Empty
+
+*** Settings ***
+Documentation     FNB (Food & Beverage) Table Order Scenarios
+...               Ροή: 8.6 debit/credit/cancel -> MARKs συσσωρεύονται ανά τραπέζι.
+...               11.1 receipt κλείνει τα pending 8.6 MARKs μέσω multipleConnectedMarks.
+...               11.4 receipt είναι η retail πιστωτική (ίδιο schema με 11.1, διαφορετικός InvoiceTypeCode).
+...               Cancel 8.6 αφαιρεί MARKs από το pool και ΔΕΝ περιλαμβάνει ποσά (αλλά Quantity=1).
+Library           RequestsLibrary
+Library           Collections
+Library           OperatingSystem
+Library           DateTime
+Library           String
+Suite Setup       Setup Suite
+Test Setup        Reset Pending Marks Pool
+
+*** Variables ***
+${BASE_URL}                https://einvoiceapiuat.impact.gr
+${TEMPLATE_8_6}            ${CURDIR}/Data/8.6_Debit_FNB_Form.json
+${TEMPLATE_8_6_CREDIT}     ${CURDIR}/Data/8.6_Return_FNB_Form.json
+${TEMPLATE_8_6_CANCEL}     ${CURDIR}/Data/8.6_Cancel_FNB_Form.json
+${TEMPLATE_11_1}           ${CURDIR}/Data/11.1_FNB_Retail_Sales_Receipt.json
+${TABLE_ID}                20
+${DEFAULT_VAT_RATE}        ${13}
+${PRODUCT_CODE}            251320104
+${API_KEY}                 03ac2ca0-2815-41eb-894f-9d3a80c6c9da
+${ISSUER_VAT}              EL154697391
+${API_KEY_HEADER_NAME}     apikey
+@{PENDING_MARKS}
+${DOC_COUNTER}             ${0}
+${TPL_8_6}                 ${EMPTY}
+${TPL_8_6_CREDIT}          ${EMPTY}
+${TPL_8_6_CANCEL}          ${EMPTY}
+${TPL_11_1}                ${EMPTY}
 
 *** Keywords ***
 # ======================================================================
@@ -150,15 +156,25 @@ Scenario 16 - Zero After Multiple Offsetting Moves
 # ======================================================================
 
 Setup Suite
+    Load Credentials From Env
     Load Base Templates
     Initialize Document Counter
-    ${auth_value}=        Set Variable           ${API_KEY_HEADER_PREFIX}${API_KEY}
+    ${auth_value}=        Set Variable           ${API_KEY}
     ${headers}=           Create Dictionary
     ...    Content-Type=application/json
     ...    Accept=application/json
     ...    ${API_KEY_HEADER_NAME}=${auth_value}
     Create Session     fnb    ${BASE_URL}    headers=${headers}
     Log                   Session created with ${API_KEY_HEADER_NAME} header    level=DEBUG
+
+Load Credentials From Env
+    [Documentation]       Διαβάζει API_KEY και ISSUER_VAT από env vars αν υπάρχουν,
+    ...                   αλλιώς κρατάει τις default τιμές από το *** Variables *** section.
+    ${env_api_key}=       Get Environment Variable    FNB_API_KEY       default=${API_KEY}
+    Set Suite Variable    ${API_KEY}             ${env_api_key}
+    ${env_issuer_vat}=    Get Environment Variable    FNB_ISSUER_VAT    default=${ISSUER_VAT}
+    Set Suite Variable    ${ISSUER_VAT}          ${env_issuer_vat}
+    Log                   Credentials loaded (issuer VAT: ${ISSUER_VAT})    level=DEBUG
 
 Load Base Templates
     ${tpl_8_6}=           Load JSON File         ${TEMPLATE_8_6}
@@ -266,7 +282,7 @@ Send 11.4 Credit
     END
     ${payload}=           Copy Dictionary        ${TPL_11_1}    deepcopy=True
     ${payload}=           Build 11 1 Payload     ${payload}    ${gross}    ${marks_to_use}
-    ...                                          invoice_type_code=11.4    record_type_code=${7}
+    ...                                          invoice_type_code=11.4    record_type_code=${0}
     ...                                          vat_rate=${vat_rate}
     ${mark}=              POST 11.1 Document     ${payload}
     Log                   11.4 CREDIT gross=${gross} connects=${marks_to_use} -> MARK ${mark}
@@ -303,7 +319,7 @@ Build 11 1 Payload
 
 Build 8 6 Cancel Payload
     [Arguments]           ${template}    ${marks_to_cancel}
-    [Documentation]       Cancel 8.6: πάντα 0 σε όλα τα amounts, totalCancelDeliveryOrders=true.
+    [Documentation]       Cancel 8.6: Quantity=1 αλλά όλα τα ποσά=0, totalCancelDeliveryOrders=true.
     ${doc_number}=        Next Document Number
     ${now}=               Current DateTime ISO
     Set To Dictionary     ${template}    number=${doc_number}    dateIssued=${now}
@@ -328,6 +344,8 @@ Apply Line And Summaries
     [Arguments]           ${payload}    ${gross}    ${vat_rate}    ${record_type_code}
     [Documentation]       Υπολογίζει και γεμίζει: Line (Quantity, UnitPrice, NetTotal, VATTotal, Total,
     ...                   VatCategory, VatCategoryCode), Summaries, VatAnalysis.
+    ...                   Ακόμα και όταν gross=0, διατηρεί το vat_rate του χρήστη ώστε το
+    ...                   VatCategoryCode να ταιριάζει με τα συσχετιζόμενα 8.6.
     ${breakdown}=         Calculate VAT Breakdown    ${gross}    ${vat_rate}
     ${cat}=               Map VAT Rate To Category   ${vat_rate}
     ${net}=               Set Variable           ${breakdown}[net]
@@ -367,11 +385,12 @@ Apply Line And Summaries
 
 Zero Out Line And Summaries
     [Arguments]           ${payload}
-    [Documentation]       Εφαρμόζεται στο Cancel 8.6 όπου όλα τα ποσά πρέπει να είναι 0.
+    [Documentation]       Cancel 8.6: Quantity=1 (placeholder record) με όλα τα ποσά = 0.
+    ...                   VatCategory="0", VatCategoryCode=8 (καμία φορολόγηση).
     ${details}=           Get From Dictionary    ${payload}    Details
     ${first_line}=        Get From List          ${details}    0
     Set To Dictionary     ${first_line}
-    ...    Quantity=${0}
+    ...    Quantity=${1}
     ...    UnitPrice=${0}
     ...    allowancesTotal=${0.0}
     ...    NetTotal=${0}
@@ -434,9 +453,12 @@ Pop Marks From Pool
 
 Remove Marks From Pool
     [Arguments]           ${marks_to_remove}
+    [Documentation]       Αφαιρεί τα δοσμένα MARKs από το pending pool.
+    ...                   Σημείωση: τα MARKs είναι integers (π.χ. 400001961636061),
+    ...                   οπότε χρησιμοποιούμε $m (όχι '${m}') για να μην γίνει string.
     @{new_pool}=          Create List
     FOR    ${m}    IN    @{PENDING_MARKS}
-        ${is_cancelled}=    Evaluate    '${m}' in $marks_to_remove
+        ${is_cancelled}=    Evaluate    $m in $marks_to_remove
         IF    not ${is_cancelled}
             Append To List    ${new_pool}    ${m}
         END
@@ -453,14 +475,83 @@ Pool Should Be Empty
 
 POST 8.6 Document
     [Arguments]           ${payload}
-    ${resp}=              POST On Session        fnb    /invoice/json    json=${payload}
-    Should Be Equal As Integers    ${resp.status_code}    200
-    ${mark}=              Get From Dictionary    ${resp.json()}    mark
+    ${mark}=              Submit FNB Document    ${payload}    label=8.6
     RETURN                ${mark}
 
 POST 11.1 Document
     [Arguments]           ${payload}
-    ${resp}=              POST On Session        fnb    /invoice/json    json=${payload}
-    Should Be Equal As Integers    ${resp.status_code}    200
-    ${mark}=              Get From Dictionary    ${resp.json()}    mark
+    ${mark}=              Submit FNB Document    ${payload}    label=11.1/11.4
     RETURN                ${mark}
+
+Submit FNB Document
+    [Arguments]           ${payload}    ${label}=FNB
+    [Documentation]       Στέλνει το payload, λογκάρει πάντα το response, και αν υπάρχει σφάλμα
+    ...                   κάνει Fail με ευανάγνωστο business message (από myDataErrors/message).
+    ${resp}=              POST On Session    fnb    /invoice/json    json=${payload}
+    ...                   expected_status=any
+    Log Response          ${resp}    ${label}
+    IF    ${resp.status_code} >= 400
+        ${err_msg}=       Extract Server Error    ${resp}
+        Fail              ${label} FAILED [HTTP ${resp.status_code} ${resp.reason}] >> ${err_msg}
+    END
+    ${body}=              Set Variable           ${resp.json()}
+    ${mark}=              Get From Dictionary    ${body}    mark    default=${NONE}
+    IF    $mark is None
+        Fail              ${label}: response 2xx αλλά λείπει το 'mark' στο body. Body: ${body}
+    END
+    RETURN                ${mark}
+
+Log Response
+    [Arguments]           ${resp}    ${label}=FNB
+    [Documentation]       Εμφανίζει status, reason και body στο Robot log (truncated αν είναι μεγάλο).
+    ${preview}=           Truncate Text          ${resp.text}    2000
+    Log                   ${label} RESPONSE [HTTP ${resp.status_code} ${resp.reason}]\n${preview}
+    ...                   level=INFO
+
+Truncate Text
+    [Arguments]           ${text}    ${max_chars}=2000
+    ${len}=               Get Length             ${text}
+    IF    ${len} <= ${max_chars}
+        RETURN            ${text}
+    END
+    ${trunc}=             Evaluate               $text[:${max_chars}]
+    RETURN                ${trunc}... [truncated ${len} chars total]
+
+Extract Server Error
+    [Arguments]           ${resp}
+    [Documentation]       Πιάνει τα πιο χρήσιμα error fields από το response body.
+    ...                   Priority: message -> myDataErrors -> errorMessage -> raw text.
+    ${body}=              Try Parse Json         ${resp}
+    IF    $body is None
+        RETURN            ${resp.text}
+    END
+    # 1) Γενικό message (το πιο ανθρώπινο)
+    ${msg}=               Get From Dictionary    ${body}    message    default=${EMPTY}
+    IF    "${msg}" != "${EMPTY}"
+        RETURN            ${msg}
+    END
+    # 2) myDataErrors array (δομημένα errors από AADE)
+    ${errors}=            Get From Dictionary    ${body}    myDataErrors    default=${EMPTY}
+    ${err_count}=         Get Length             ${errors}
+    IF    ${err_count} > 0
+        ${joined}=        Evaluate
+        ...    ' | '.join([f"[{e.get('key','?')}] {e.get('value','')}" for e in $errors])
+        RETURN            ${joined}
+    END
+    # 3) Apla errorMessage
+    ${em}=                Get From Dictionary    ${body}    errorMessage    default=${EMPTY}
+    IF    "${em}" != "${EMPTY}"
+        RETURN            ${em}
+    END
+    # 4) Fallback: όλο το body ως string
+    RETURN                ${resp.text}
+
+Try Parse Json
+    [Arguments]           ${resp}
+    TRY
+        ${body}=          Set Variable           ${resp.json()}
+        RETURN            ${body}
+    EXCEPT
+        RETURN            ${NONE}
+    END
+

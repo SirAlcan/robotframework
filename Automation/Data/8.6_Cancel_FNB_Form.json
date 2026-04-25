@@ -6,8 +6,8 @@
     "InvoiceTypeCode": "8.6",
     "SpecialInvoiceCategory": 0,
     "DocumentTypeCode": "INVOICE",
-    "totalCancelDeliveryOrders": true,
-    "Series": "FNB",
+    "cancelDeliveryOrders": true,
+    "Series": "FNB-CANCEL",
     "number": "{{incrementalCounter}}",
     "dateIssued": "{{currentdate}}",
     "RelativeDocuments": [],
@@ -58,7 +58,7 @@
         ]
     },
     "DistributionDetails": {
-        "InternalDocumentId": "{{incrementalCounter}}",
+        "InternalDocumentId": "InternalDocumentId1",
         "salesman": "Waiter Α1",
         "content": "3"
     },

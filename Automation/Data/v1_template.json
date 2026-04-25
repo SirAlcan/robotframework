@@ -1,0 +1,73 @@
+{
+    "isDelayedCode": 0,
+    "currency": "Euro",
+    "currencyCode": "EUR",
+    "series": "AEPOS-RETURN",
+    "number": "1",
+    "dateIssued": "2026-01-01",
+    "invoiceType": "POS Return Receipt",
+    "invoiceTypeCode": "8.5",
+    "documentTypeCode": "INVOICE",
+    "thirdPartyCollection": false,
+    "providerSignatureIdentifier": "1",
+    "exchangeCurrencyRate": 1.00000,
+    "totalAmount": 124,
+    "totalAmountAC": 0,
+    "Issuer": {
+        "RegisteredName": "issuer's name",
+        "Vat": "123456789",
+        "GeneralCommercialRegistryNumber": "00000000000",
+        "TaxOffice": "issuer's Tax Office",
+        "contactPerson": "issuer' Contact Person",
+        "Phones": ["2000000000"],
+        "Faxes": ["2000000000"],
+        "Address": {
+            "CountryCode": "GR",
+            "City": "issuer's city",
+            "Street": "issuer's street",
+            "Number": "issuer's number",
+            "Postal": "issuer's postal code"
+        },
+        "BranchCode": 0,
+        "Branch": "Main Branch"
+    },
+    "CounterParty": {
+        "RegisteredName": "RETAIL CUSTOMER",
+        "code": "0000065",
+        "Vat": "",
+        "Address": {
+            "CountryCode": "GR",
+            "Municipality": null,
+            "City": null,
+            "Street": null,
+            "number": null,
+            "Postal": null
+        },
+        "Branch": 0
+    },
+    "cardlines": [
+        {
+            "lineNo": 1,
+            "amount": 124,
+            "amountAC": 0,
+            "tipAmount": 0,
+            "tipAmountAC": 0,
+            "transactionId": null,
+            "providersSignature": null,
+            "posInput": null,
+            "terminalId": "160001208",
+            "remarks": "Credit Card",
+            "isInformative": false,
+            "isHidden": false
+        }
+    ],
+    "AdditionalDetails": {
+        "AccountingDepartmentEmails": [],
+        "TransmissionMethod": "A",
+        "AvoidEmailGrouping": false
+    },
+    "internalDocumentId": "InternalId_Receipt_1",
+    "miscellaneousData": {
+        "comments1": "remarks"
+    }
+}

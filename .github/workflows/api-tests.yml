@@ -23,33 +23,33 @@ jobs:
 
       - id: set
         run: |
-          files=$(cat <<'LIST_END'
-          Automation/FNB_case_multiple_11.1.robot
-        #Automation/FNB_case_multiple_11.1_Draft.robot
-        #Automation/FNB_InternalID_Cases.robot
-          Automation/POS_flows.robot
-        #Automation/Receipts_InternalID_Cases.robot
-          LIST_END
+          # Explicit list of API .robot suites to run.
+          # Add or remove entries below to control what runs.
+          suites=(
+            "Automation/FNB_case_multiple_11.1.robot"
+        #"Automation/FNB_case_multiple_11.1_Draft.robot"
+            "Automation/FNB_InternalID_Cases.robot"
+            "Automation/POS_flows.robot"
+            "Automation/Receipts_InternalID_Cases.robot"
           )
+
           # Verify each file actually exists, fail fast if not (catches typos).
           missing=0
-          while IFS= read -r f; do
-            if [ -z "$f" ]; then
-              continue
-            fi
+          for f in "${suites[@]}"; do
             if [ ! -f "$f" ]; then
               echo "::error::Suite not found in repo: $f"
               missing=1
             fi
-          done <<< "$files"
+          done
           if [ "$missing" -eq 1 ]; then
             exit 1
           fi
 
-          json=$(printf '%s\n' "$files" \
+          # Build JSON: {"suite":["a.robot","b.robot",...]} for the matrix.
+          json=$(printf '%s\n' "${suites[@]}" \
                 | python3 -c 'import json,sys; print(json.dumps({"suite":[l.strip() for l in sys.stdin if l.strip()]}))')
           echo "Suites to run:"
-          printf '%s\n' "$files" | sed 's/^/  - /'
+          printf '  - %s\n' "${suites[@]}"
           echo "matrix=$json" >> "$GITHUB_OUTPUT"
 
   # --------------------------------------------------------------------------
@@ -58,7 +58,7 @@ jobs:
   # --------------------------------------------------------------------------
   test:
     needs: discover
-    if: ${{ needs.discover.outputs.matrix != '' && fromJSON(needs.discover.outputs.matrix).suite[0] != null }}
+    if: needs.discover.outputs.matrix != ''
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false        # one suite failing shouldn't kill the others

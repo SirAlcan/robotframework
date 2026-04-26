@@ -1,3 +1,7 @@
 robotframework
 robotframework-seleniumlibrary
 webdriver-manager
+robotframework-requests
+requests
+robotframework-jsonlibrary       # για JSONLibrary, αν τη χρησιμοποιείς
+robotframework-datetime-tz        # αν χειρίζεσαι timezones

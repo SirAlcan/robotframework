@@ -161,8 +161,9 @@ jobs:
         shell: bash
         run: |
           python3 - <<'PYEOF'
-          import os
+          import os, re
           import xml.etree.ElementTree as ET
+          from collections import defaultdict
 
           OUT_XML = 'combined/output.xml'
           EMAIL_FILE = 'email_body.txt'
@@ -172,56 +173,166 @@ jobs:
                   f.write(text)
 
           if not os.path.exists(OUT_XML):
-              write("No combined output.xml produced. Check per-suite artifacts to see what failed.")
+              write("No combined output.xml produced.\nCheck per-suite artifacts to see what failed.")
               raise SystemExit(0)
 
           tree = ET.parse(OUT_XML)
           root = tree.getroot()
           stats = root.find('.//total/stat')
-          total_pass = stats.get('pass')
-          total_fail = stats.get('fail')
-          total_skip = stats.get('skip')
+          total_pass = int(stats.get('pass', 0))
+          total_fail = int(stats.get('fail', 0))
+          total_skip = int(stats.get('skip', 0))
+          total = total_pass + total_fail + total_skip
+          pass_pct = round(100 * total_pass / total) if total else 0
 
+          repo = os.environ.get('GITHUB_REPOSITORY', '')
+          run_id = os.environ.get('GITHUB_RUN_ID', '')
+          run_url = f"https://github.com/{repo}/actions/runs/{run_id}"
+
+          # Collect leaf suites (those that contain <test> directly)
           suites = {}
           for suite in root.iter('suite'):
               tests = suite.findall('test')
-              if not tests:
-                  continue
-              suites[suite.get('name') or '(unnamed)'] = tests
+              if tests:
+                  suites[suite.get('name') or '(unnamed)'] = tests
 
-          blocks = []
+          # Classify error messages into readable categories
+          def classify(msg):
+              m = (msg or '').lower()
+              if 'filenotfounderror' in m or 'no such file' in m:
+                  return 'Missing file'
+              if 'modulenotfounderror' in m or 'no module named' in m:
+                  return 'Missing library'
+              if '409' in m or 'already been transmitted' in m:
+                  return 'UID conflict (already transmitted)'
+              if '408' in m or 'timeout' in m:
+                  return 'Timeout'
+              if 'not authorized' in m or 'unauthorized' in m or '401' in m or '403' in m:
+                  return 'Authorization error'
+              if 'validation' in m or '400' in m or 'invalid' in m:
+                  return 'API validation error'
+              if '500' in m or 'server error' in m:
+                  return 'Server error'
+              if 'length of' in m or 'should be' in m or ('expected' in m and 'got' in m):
+                  return 'Assertion failed'
+              if 'no keyword' in m or 'create session' in m:
+                  return 'Missing keyword / library'
+              return 'Other error'
+
+          EQ = '=' * 68
+          SEP = '-' * 68
+
+          # ---------- Suite summary table ----------
+          suite_summary = []
+          all_failures = []
+
           for suite_name, tests in suites.items():
-              lines = [f"\n  [SUITE] {suite_name}"]
-              for t in tests:
-                  name = t.get('name')
+              passed = [t for t in tests if t.find('status').get('status') == 'PASS']
+              failed = [t for t in tests if t.find('status').get('status') == 'FAIL']
+              skipped = [t for t in tests if t.find('status').get('status') not in ('PASS','FAIL')]
+              icon = 'OK  ' if not failed else 'FAIL'
+              suite_summary.append(
+                  f"  [{icon}]  {suite_name:<44} {len(passed):>3}P  {len(failed):>3}F  {len(skipped):>3}S"
+              )
+              for t in failed:
                   st = t.find('status')
-                  result = st.get('status')
-                  elapsed = float(st.get('elapsed', 0))
-                  icon = '[PASS]' if result == 'PASS' else ('[FAIL]' if result == 'FAIL' else '[SKIP]')
-                  msg = ''
-                  if result == 'FAIL':
-                      m = (st.get('message') or '').strip() or (st.text or 'N/A').strip()
-                      msg = f"\n        Error: {m[:300]}"
-                  lines.append(f"    {icon} {name} ({elapsed:.2f}s){msg}")
-              blocks.append('\n'.join(lines))
+                  raw = (st.get('message') or '').strip() or (st.text or '').strip()
+                  raw = re.sub(r'^Several failures occurred:\s*', '', raw)
+                  subs = [s.strip() for s in re.split(r'\n\s*\d+\)\s+', raw) if s.strip()]
+                  all_failures.append({
+                      'suite': suite_name,
+                      'test': t.get('name'),
+                      'category': classify(raw),
+                      'subs': subs or [raw],
+                  })
 
-          details = '\n'.join(blocks) if blocks else '  (no tests found)'
-          repo = os.environ.get('GITHUB_REPOSITORY', '')
-          run_id = os.environ.get('GITHUB_RUN_ID', '')
+          # ---------- Failures by category ----------
+          by_cat = defaultdict(list)
+          for f in all_failures:
+              by_cat[f['category']].append(f)
 
-          body = (
-              "API Regression Test Report\n"
-              "==========================\n\n"
-              "Totals:\n"
-              f"  Passed : {total_pass}\n"
-              f"  Failed : {total_fail}\n"
-              f"  Skipped: {total_skip}\n\n"
-              "Per suite / test case:\n"
-              f"{details}\n\n"
-              "Full report (artifacts):\n"
-              f"https://github.com/{repo}/actions/runs/{run_id}\n"
-          )
-          write(body)
+          cat_lines = []
+          for cat in sorted(by_cat):
+              items = by_cat[cat]
+              cat_lines.append(f"\n  {cat} ({len(items)} test(s)):")
+              for it in items:
+                  cat_lines.append(f"    - [{it['suite']}]  {it['test']}")
+
+          # ---------- Detailed per-suite blocks ----------
+          detail_blocks = []
+          for suite_name, tests in suites.items():
+              passed = [t for t in tests if t.find('status').get('status') == 'PASS']
+              failed = [t for t in tests if t.find('status').get('status') == 'FAIL']
+              skipped = [t for t in tests if t.find('status').get('status') not in ('PASS','FAIL')]
+              status_word = 'ALL PASSING' if not failed else f'{len(failed)} FAILED'
+              lines = [SEP, f"SUITE: {suite_name}  [{status_word}]", SEP]
+
+              if passed:
+                  lines.append(f"  Passed ({len(passed)}):")
+                  for t in passed:
+                      elapsed = float(t.find('status').get('elapsed', 0))
+                      lines.append(f"    + {t.get('name')} ({elapsed:.2f}s)")
+
+              if failed:
+                  lines.append(f"\n  Failed ({len(failed)}):")
+                  for t in failed:
+                      st = t.find('status')
+                      elapsed = float(st.get('elapsed', 0))
+                      raw = (st.get('message') or '').strip() or (st.text or '').strip()
+                      raw = re.sub(r'^Several failures occurred:\s*', '', raw)
+                      subs = [s.strip() for s in re.split(r'\n\s*\d+\)\s+', raw) if s.strip()]
+                      cat = classify(raw)
+                      lines.append(f"\n    [FAIL] {t.get('name')} ({elapsed:.2f}s)")
+                      lines.append(f"    Category : {cat}")
+                      if len(subs) == 1:
+                          lines.append(f"    Error    : {subs[0][:500]}")
+                      else:
+                          lines.append(f"    Errors ({len(subs)} sub-steps):")
+                          for i, sf in enumerate(subs, 1):
+                              lines.append(f"      {i}. {sf[:400]}")
+
+              if skipped:
+                  lines.append(f"\n  Skipped ({len(skipped)}):")
+                  for t in skipped:
+                      lines.append(f"    ~ {t.get('name')}")
+
+              detail_blocks.append('\n'.join(lines))
+
+          # ---------- Assemble final body ----------
+          overall = 'ALL TESTS PASSED' if total_fail == 0 else f'{total_fail} TEST(S) FAILED'
+          parts = [
+              EQ,
+              'API REGRESSION TEST REPORT',
+              EQ,
+              '',
+              f'  Result   : {overall}',
+              f'  Passed   : {total_pass} / {total}  ({pass_pct}%)',
+              f'  Failed   : {total_fail}',
+              f'  Skipped  : {total_skip}',
+              f'  Run URL  : {run_url}',
+              '',
+              EQ,
+              'SUITE SUMMARY  (P=passed  F=failed  S=skipped)',
+              EQ,
+              *suite_summary,
+          ]
+          if all_failures:
+              parts += [
+                  '',
+                  EQ,
+                  'FAILURES BY CATEGORY',
+                  EQ,
+                  *cat_lines,
+              ]
+          parts += [
+              '',
+              EQ,
+              'DETAILED RESULTS',
+              EQ,
+              *detail_blocks,
+              EQ,
+          ]
+          write('\n'.join(parts))
           PYEOF
 
       - name: Send Email Report

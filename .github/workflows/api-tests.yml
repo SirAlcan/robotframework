@@ -12,7 +12,7 @@ env:
 jobs:
   # --------------------------------------------------------------------------
   # 1) Explicit list of API .robot suites to run. To add/remove a suite from
-  #    the regression run, edit the heredoc below.
+  #    the regression run, edit the list below.
   # --------------------------------------------------------------------------
   discover:
     runs-on: ubuntu-latest
@@ -23,24 +23,28 @@ jobs:
 
       - id: set
         run: |
-          files=$(cat <<'EOF'
+          files=$(cat <<'LIST_END'
           Automation/FNB_case_multiple_11.1.robot
         #Automation/FNB_case_multiple_11.1_Draft.robot
         #Automation/FNB_InternalID_Cases.robot
           Automation/POS_flows.robot
         #Automation/Receipts_InternalID_Cases.robot
-          EOF
+          LIST_END
           )
           # Verify each file actually exists, fail fast if not (catches typos).
           missing=0
           while IFS= read -r f; do
-            [ -z "$f" ] && continue
+            if [ -z "$f" ]; then
+              continue
+            fi
             if [ ! -f "$f" ]; then
               echo "::error::Suite not found in repo: $f"
               missing=1
             fi
           done <<< "$files"
-          [ $missing -eq 1 ] && exit 1
+          if [ "$missing" -eq 1 ]; then
+            exit 1
+          fi
 
           json=$(printf '%s\n' "$files" \
                 | python3 -c 'import json,sys; print(json.dumps({"suite":[l.strip() for l in sys.stdin if l.strip()]}))')
@@ -135,8 +139,11 @@ jobs:
           mkdir -p combined
           # Collect every per-suite output.xml. `rebot` merges them into one
           # output.xml + log.html + report.html, treating each as a child suite.
-          mapfile -t outputs < <(find artifacts -type f -name 'output.xml' | sort)
-          if [ ${#outputs[@]} -eq 0 ]; then
+          outputs=()
+          while IFS= read -r line; do
+            outputs+=("$line")
+          done < <(find artifacts -type f -name 'output.xml' | sort)
+          if [ "${#outputs[@]}" -eq 0 ]; then
             echo "No output.xml files found - all jobs probably failed before producing results."
             exit 0
           fi

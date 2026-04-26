@@ -1,0 +1,267 @@
+name: API Regression Tests
+
+on:
+  schedule:
+    - cron: '0 6 * * *'
+    - cron: '0 14 * * *'
+  workflow_dispatch:
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  # --------------------------------------------------------------------------
+  # 1) Explicit list of API .robot suites to run. To add/remove a suite from
+  #    the regression run, edit the heredoc below.
+  # --------------------------------------------------------------------------
+  discover:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v4.2.2
+
+      - id: set
+        run: |
+          files=$(cat <<'EOF'
+          Automation/FNB_case_multiple_11.1.robot
+        #Automation/FNB_case_multiple_11.1_Draft.robot
+        #Automation/FNB_InternalID_Cases.robot
+          Automation/POS_flows.robot
+        #Automation/Receipts_InternalID_Cases.robot
+          EOF
+          )
+          # Verify each file actually exists, fail fast if not (catches typos).
+          missing=0
+          while IFS= read -r f; do
+            [ -z "$f" ] && continue
+            if [ ! -f "$f" ]; then
+              echo "::error::Suite not found in repo: $f"
+              missing=1
+            fi
+          done <<< "$files"
+          [ $missing -eq 1 ] && exit 1
+
+          json=$(printf '%s\n' "$files" \
+                | python3 -c 'import json,sys; print(json.dumps({"suite":[l.strip() for l in sys.stdin if l.strip()]}))')
+          echo "Suites to run:"
+          printf '%s\n' "$files" | sed 's/^/  - /'
+          echo "matrix=$json" >> "$GITHUB_OUTPUT"
+
+  # --------------------------------------------------------------------------
+  # 2) Run each suite in its own job, in parallel. Each job uploads its own
+  #    output.xml as a separate artifact named after the file (sanitised).
+  # --------------------------------------------------------------------------
+  test:
+    needs: discover
+    if: ${{ needs.discover.outputs.matrix != '' && fromJSON(needs.discover.outputs.matrix).suite[0] != null }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false        # one suite failing shouldn't kill the others
+      matrix: ${{ fromJSON(needs.discover.outputs.matrix) }}
+
+    steps:
+      - uses: actions/checkout@v4.2.2
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Compute suite slug
+        id: slug
+        run: |
+          # "Automation/api/test_flows.robot" -> "api_test_flows"
+          slug=$(echo '${{ matrix.suite }}' \
+                 | sed -E 's|^Automation/||; s|\.robot$||; s|[/ ]|_|g')
+          echo "slug=$slug" >> "$GITHUB_OUTPUT"
+          echo "Slug for ${{ matrix.suite }}: $slug"
+
+      - name: Run ${{ matrix.suite }}
+        env:
+          EINVOICE_API_KEY: ${{ secrets.EINVOICE_API_KEY }}
+        # `|| true` would hide failures; we DON'T want that — the runner should
+        # mark the job red so you can see in the matrix view which one failed.
+        # The aggregator step still runs because of `if: always()` later.
+        run: |
+          mkdir -p results
+          robot --outputdir results \
+                --output output.xml \
+                --log log.html \
+                --report report.html \
+                "${{ matrix.suite }}"
+
+      - name: Upload per-suite artifact
+        if: always()
+        uses: actions/upload-artifact@v4.6.2
+        with:
+          name: api-results-${{ steps.slug.outputs.slug }}
+          path: results/
+          retention-days: 14
+
+  # --------------------------------------------------------------------------
+  # 3) Pull every per-suite artifact, merge their output.xml files with
+  #    `rebot`, and send a single email with the combined report.
+  # --------------------------------------------------------------------------
+  report:
+    needs: test
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4.2.2
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install Robot Framework (for rebot)
+        run: |
+          python -m pip install --upgrade pip
+          pip install robotframework
+
+      - name: Download all per-suite artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          pattern: api-results-*
+          merge-multiple: false
+
+      - name: Merge results with rebot
+        run: |
+          mkdir -p combined
+          # Collect every per-suite output.xml. `rebot` merges them into one
+          # output.xml + log.html + report.html, treating each as a child suite.
+          mapfile -t outputs < <(find artifacts -type f -name 'output.xml' | sort)
+          if [ ${#outputs[@]} -eq 0 ]; then
+            echo "No output.xml files found - all jobs probably failed before producing results."
+            exit 0
+          fi
+          echo "Merging ${#outputs[@]} suite output(s):"
+          printf '  - %s\n' "${outputs[@]}"
+          rebot --name "API Regression Suite" \
+                --outputdir combined \
+                --output output.xml \
+                --log log.html \
+                --report report.html \
+                "${outputs[@]}"
+
+      - name: Upload combined report
+        if: always()
+        uses: actions/upload-artifact@v4.6.2
+        with:
+          name: api-combined-report
+          path: combined/
+
+      - name: Parse combined results
+        if: always()
+        run: |
+          python3 << 'EOF'
+          import os
+          import xml.etree.ElementTree as ET
+
+          out_xml = 'combined/output.xml'
+          if not os.path.exists(out_xml):
+              body = "No combined output.xml produced - all suites failed before reporting."
+              with open('email_body.txt', 'w', encoding='utf-8') as f:
+                  f.write(body)
+              raise SystemExit(0)
+
+          tree = ET.parse(out_xml)
+          root = tree.getroot()
+
+          stats = root.find('.//total/stat')
+          total_pass = stats.get('pass')
+          total_fail = stats.get('fail')
+          total_skip = stats.get('skip')
+
+          # Group tests by their parent suite (one section per .robot file).
+          # ElementTree doesn't track parents, so we walk suites and collect
+          # the tests that are direct/indirect children.
+          suites = {}
+          for suite in root.iter('suite'):
+              # Only collect leaf suites (those that contain <test>, not just sub-suites)
+              tests = suite.findall('test')
+              if not tests:
+                  continue
+              name = suite.get('name') or '(unnamed)'
+              suites[name] = tests
+
+          test_blocks = []
+          for suite_name, tests in suites.items():
+              lines = [f"\n  📁 {suite_name}"]
+              for test in tests:
+                  name = test.get('name')
+                  status = test.find('status')
+                  result = status.get('status')
+                  elapsed = float(status.get('elapsed', 0))
+                  elapsed_str = f"{elapsed:.2f}s"
+
+                  if result == 'PASS':
+                      icon = '✅'
+                  elif result == 'FAIL':
+                      icon = '❌'
+                  else:
+                      icon = '⏭️'
+
+                  message = ''
+                  if result == 'FAIL':
+                      msg = (status.get('message') or '').strip()
+                      if not msg:
+                          msg = (status.text or 'N/A').strip()
+                      message = f"\n        Σφάλμα: {msg[:300]}"
+
+                  lines.append(f"    {icon} {name} ({elapsed_str}){message}")
+              test_blocks.append('\n'.join(lines))
+
+          details = '\n'.join(test_blocks) if test_blocks else '  (no tests found)'
+
+          repo = os.environ.get('GITHUB_REPOSITORY', '')
+          run_id = os.environ.get('GITHUB_RUN_ID', '')
+
+          body = f"""
+          ╔══════════════════════════════════════╗
+               🤖 API Regression Test Report
+          ╚══════════════════════════════════════╝
+
+          📊 ΣΥΝΟΛΙΚΑ ΑΠΟΤΕΛΕΣΜΑΤΑ:
+          ✅ Passed : {total_pass}
+          ❌ Failed : {total_fail}
+          ⏭️ Skipped: {total_skip}
+
+          📋 ΑΝΑΛΥΤΙΚΑ ΑΝΑ SUITE / TEST CASE:
+          {details}
+
+          🔗 Πλήρες Report (όλα τα artifacts):
+          https://github.com/{repo}/actions/runs/{run_id}
+          """
+
+          with open('email_body.txt', 'w', encoding='utf-8') as f:
+              f.write(body)
+          EOF
+
+      - name: Read Email Body
+        if: always()
+        run: |
+          {
+            echo "EMAIL_BODY<<EOF"
+            cat email_body.txt
+            echo "EOF"
+          } >> $GITHUB_ENV
+
+      - name: Send Email Report
+        if: always()
+        uses: dawidd6/action-send-mail@v3.11.0
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          username: ${{ secrets.EMAIL_USERNAME }}
+          password: ${{ secrets.EMAIL_PASSWORD }}
+          to: gkazakou@impact.gr
+          from: GitHub Actions <${{ secrets.EMAIL_USERNAME }}>
+          subject: "🤖 API Regression Test Report - ${{ needs.test.result }}"
+          body: ${{ env.EMAIL_BODY }}
+          attachments: combined/output.xml, combined/log.html, combined/report.html

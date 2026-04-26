@@ -1,4 +1,4 @@
-name: Regression Tests
+name: Hotdog UI Tests
 
 on:
   schedule:
@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true   # ← Προσθήκη εδώ
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
   build:
@@ -15,10 +15,10 @@ jobs:
 
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v4.2.2          # ← αλλαγή
+        uses: actions/checkout@v4.2.2
 
       - name: Set up Python
-        uses: actions/setup-python@v5          # ←  αλλαγή
+        uses: actions/setup-python@v5
         with:
           python-version: '3.10'
 
@@ -29,30 +29,33 @@ jobs:
 
       - name: Run Robot Framework Tests
         run: |
-            mkdir -p results
-            robot --variable HEADLESS:True --outputdir results Automation/Hotdog.robot
+          mkdir -p results
+          robot --variable HEADLESS:True \
+                --outputdir results \
+                Automation/Hotdog.robot
 
       - name: Upload Test Reports
         if: always()
-        uses: actions/upload-artifact@v4.6.2   # ← αλλαγή
+        uses: actions/upload-artifact@v4.6.2
         with:
-          name: robot-framework-reports
+          name: hotdog-reports
           path: results/
 
       - name: Parse Test Results
         if: always()
         run: |
           python3 << 'EOF'
+          import os
           import xml.etree.ElementTree as ET
-          
+
           tree = ET.parse('results/output.xml')
           root = tree.getroot()
-          
+
           stats = root.find('.//total/stat')
           total_pass = stats.get('pass')
           total_fail = stats.get('fail')
           total_skip = stats.get('skip')
-          
+
           test_details = []
           for test in root.findall('.//test'):
               name = test.get('name')
@@ -60,25 +63,28 @@ jobs:
               result = status.get('status')
               elapsed = float(status.get('elapsed', 0))
               elapsed_str = f"{elapsed:.2f}s"
-          
+
               if result == 'PASS':
                   icon = '✅'
               elif result == 'FAIL':
                   icon = '❌'
               else:
                   icon = '⏭️'
-          
+
               message = ''
               if result == 'FAIL':
-                  message = f"\n      Σφάλμα: {status.get('message', 'N/A')[:200]}"
-          
+                  msg = (status.get('message') or '').strip() or (status.text or 'N/A').strip()
+                  message = f"\n      Σφάλμα: {msg[:200]}"
+
               test_details.append(f"  {icon} {name} ({elapsed_str}){message}")
-          
+
           details = '\n'.join(test_details)
-          
+          repo = os.environ.get('GITHUB_REPOSITORY', '')
+          run_id = os.environ.get('GITHUB_RUN_ID', '')
+
           body = f"""
           ╔══════════════════════════════════════╗
-               🤖 Robot Framework Test Report
+               🤖 Hotdog UI Test Report
           ╚══════════════════════════════════════╝
 
           📊 ΣΥΝΟΛΙΚΑ ΑΠΟΤΕΛΕΣΜΑΤΑ:
@@ -90,27 +96,32 @@ jobs:
           {details}
 
           🔗 Πλήρες Report:
-          https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          https://github.com/{repo}/actions/runs/{run_id}
           """
-          
+
           with open('email_body.txt', 'w', encoding='utf-8') as f:
               f.write(body)
           EOF
 
       - name: Read Email Body
         if: always()
-        run: echo "EMAIL_BODY<<EOF" >> $GITHUB_ENV && cat email_body.txt >> $GITHUB_ENV && echo "EOF" >> $GITHUB_ENV
+        run: |
+          {
+            echo "EMAIL_BODY<<EOF"
+            cat email_body.txt
+            echo "EOF"
+          } >> $GITHUB_ENV
 
       - name: Send Email Report
         if: always()
-        uses: dawidd6/action-send-mail@v3.11.0  # ← αλλαγή
+        uses: dawidd6/action-send-mail@v3.11.0
         with:
           server_address: smtp.gmail.com
           server_port: 465
           username: ${{ secrets.EMAIL_USERNAME }}
           password: ${{ secrets.EMAIL_PASSWORD }}
-          to: gkazakou@impact.gr #, chpappa@impact.gr, mzogopoulou@impact.gr, amt@entersoftone.gr
+          to: gkazakou@impact.gr
           from: GitHub Actions <${{ secrets.EMAIL_USERNAME }}>
-          subject: "🤖 Hotdog Test Report - ${{ job.status }}"
+          subject: "🤖 Hotdog UI Test Report - ${{ job.status }}"
           body: ${{ env.EMAIL_BODY }}
           attachments: results/output.xml, results/log.html, results/report.html

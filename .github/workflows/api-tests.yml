@@ -161,22 +161,7 @@ jobs:
         shell: bash
         run: |
           python3 - <<'PYEOF'
-          """
-          Build a structured email report from rebot's combined output.xml.
-
-          Approach: instead of guessing error categories from string matching,
-          we *parse* the assertion messages our own tests produce. The format
-          we look for inside any FAIL message is the pipe-separated string
-          built by helpers.py:
-
-              <prefix> | success=<bool> | msg="<api message>" | mark=<id> | ...
-
-          Anything we can extract is shown as labelled fields. Anything we
-          can't is shown as a single 'Raw' line. Either way the email stays
-          structured and predictable, no matter what new suites you add.
-          """
-          import os
-          import re
+          import json, os, re
           import xml.etree.ElementTree as ET
 
           OUT_XML    = 'combined/output.xml'
@@ -185,212 +170,215 @@ jobs:
           run_id     = os.environ.get('GITHUB_RUN_ID', '')
           run_url    = f"https://github.com/{repo}/actions/runs/{run_id}"
 
+          WIDTH  = 78
+          NAME_W = 50
+
           def write(text):
               with open(EMAIL_FILE, 'w', encoding='utf-8') as f:
                   f.write(text)
 
           if not os.path.exists(OUT_XML):
               write(
-                  "API REGRESSION TEST REPORT\n" + "=" * 68 + "\n\n"
+                  "API REGRESSION TEST REPORT\n" + "=" * WIDTH + "\n\n"
                   "  No combined output.xml produced.\n"
-                  "  Most likely all suites failed to start (missing library,\n"
-                  "  syntax error, infrastructure issue). Check the workflow logs.\n\n"
+                  "  All suites probably failed before producing results.\n\n"
                   f"  Run URL: {run_url}\n"
               )
               raise SystemExit(0)
 
           tree = ET.parse(OUT_XML)
           root = tree.getroot()
-
-          stats      = root.find('.//total/stat')
+          stats = root.find('.//total/stat')
           total_pass = int(stats.get('pass', 0))
           total_fail = int(stats.get('fail', 0))
           total_skip = int(stats.get('skip', 0))
           total      = total_pass + total_fail + total_skip
           pass_pct   = round(100 * total_pass / total) if total else 0
 
-          # ── extract structured info from assertion messages ────────────────
-          # Matches every "key=value" or 'msg="..."' or 'msg=...' segment when
-          # split on " | ". Tolerant to extra/missing fields.
-          KV_PATTERN = re.compile(
-              r'^(?P<key>[A-Za-z_][A-Za-z0-9_]*)\s*=\s*(?P<value>.*)$'
-          )
+          root_status = root.find('suite/status')
+          if root_status is not None:
+              t_secs = float(root_status.get('elapsed', 0))
+              tm, ts = divmod(t_secs, 60)
+              total_dur = f"{int(tm)}m{int(ts):02d}s" if tm else f"{ts:.1f}s"
+          else:
+              total_dur = "—"
 
-          def parse_message(raw):
-              """
-              Parse the FAIL message into:
-                {summary: 'first chunk before pipes', fields: {key: value, ...}}
-              The summary captures the human-readable lead (e.g.
-              "F2 step 3 (/Receipt): expected 201, got 409").
-              """
-              if not raw:
-                  return {'summary': '', 'fields': {}}
+          # ── parsing helpers ────────────────────────────────────────────────
+          KV_RE      = re.compile(r'^([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*)$')
+          BODY_RE    = re.compile(r'(\{.*\})', re.DOTALL)
+          MESSAGE_RE = re.compile(r'"message"\s*:\s*"([^"]*)"')
+          STEP_SPLIT_RE = re.compile(r'(?:^|\n)\s*\d+\)\s+', re.MULTILINE)
 
-              raw = raw.strip()
-              # Strip trailing "<actual> != <expected>" appended by Should Be Equal
-              raw = re.sub(r':\s*\d+\s*!=\s*\d+\s*$', '', raw)
+          def extract_api_message(text):
+              if not text:
+                  return ''
+              for body_match in BODY_RE.finditer(text):
+                  body = body_match.group(1)
+                  try:
+                      data = json.loads(body)
+                      if isinstance(data, dict):
+                          if data.get('message'):
+                              return str(data['message'])
+                          if data.get('error'):
+                              return str(data['error'])
+                  except Exception:
+                      m = MESSAGE_RE.search(body)
+                      if m:
+                          return m.group(1)
+              m = re.search(r'msg\s*=\s*"([^"]+)"', text)
+              return m.group(1) if m else ''
 
-              parts = [p.strip() for p in raw.split('|')]
+          def parse_step(text):
+              text = (text or '').strip()
+              text = re.sub(r':\s*\d+\s*!=\s*\d+\s*$', '', text)
+              api_msg = extract_api_message(text)
+              cleaned = BODY_RE.sub('<JSON body>', text)
+              parts = [p.strip() for p in cleaned.split('|')]
               summary = parts[0] if parts else ''
-              fields  = {}
+              fields = {}
               for p in parts[1:]:
-                  m = KV_PATTERN.match(p)
+                  m = KV_RE.match(p)
                   if m:
-                      v = m.group('value').strip()
+                      v = m.group(2).strip()
                       if v.startswith('"') and v.endswith('"'):
                           v = v[1:-1]
-                      fields[m.group('key')] = v
+                      fields[m.group(1)] = v
+              if api_msg:
+                  fields['message'] = api_msg
               return {'summary': summary, 'fields': fields}
 
-          def extract_api_payload_from_logs(test_elem):
-              """
-              Walk INFO-level <msg> nodes and pick out anything that looks
-              like an API response body or contains a 'message' field. This
-              is a fallback when the assertion message itself is empty or
-              uninformative (e.g. setup failures).
-              """
-              hits = []
-              for msg in test_elem.iter('msg'):
-                  level = msg.get('level', '')
-                  text  = (msg.text or '').strip()
-                  if not text:
-                      continue
-                  # Skip noise
-                  if text.startswith('${') and ' = ' in text:
-                      continue
-                  # Look for response-like content
-                  if (
-                      'success' in text and ('True' in text or 'False' in text)
-                      or "'message'" in text or '"message"' in text
-                      or "'error'" in text or '"error"' in text
-                      or 'msg=' in text
-                  ):
-                      # Truncate dicts that get printed in full
-                      if len(text) > 240:
-                          text = text[:240] + '…'
-                      hits.append((level, text))
-              return hits
+          def split_into_steps(raw):
+              if not raw:
+                  return []
+              raw = raw.strip()
+              if raw.startswith('Several failures occurred:'):
+                  raw = raw[len('Several failures occurred:'):].strip()
+                  parts = STEP_SPLIT_RE.split(raw)
+                  return [p.strip() for p in parts if p.strip()]
+              return [raw]
 
-          # ── collect leaf suites (those with <test> directly) ───────────────
+          def render_parsed(out, parsed, indent=6):
+              pad = ' ' * indent
+              if parsed['summary']:
+                  out.append(f"{pad}Summary : {parsed['summary'][:WIDTH-indent-12]}")
+              if parsed['fields']:
+                  preferred = ['expected', 'got', 'success', 'message',
+                               'msg', 'mark', 'uid', 'erp', 'series',
+                               'internalDocumentId', 'status']
+                  seen = set()
+                  for key in preferred:
+                      if key in parsed['fields']:
+                          val = parsed['fields'][key]
+                          out.append(f"{pad}{key:<8}: {val[:WIDTH-indent-12]}")
+                          seen.add(key)
+                  for key, val in parsed['fields'].items():
+                      if key not in seen:
+                          out.append(f"{pad}{key:<8}: {val[:WIDTH-indent-12]}")
+              if not parsed['summary'] and not parsed['fields']:
+                  out.append(f"{pad}(no parseable details — empty assertion)")
+
+          # ── collect leaf suites ────────────────────────────────────────────
           suites = []
           for suite in root.iter('suite'):
               tests = suite.findall('test')
-              if not tests:
-                  continue
-              suites.append((suite.get('name') or '(unnamed)', tests))
+              if tests:
+                  suites.append((suite.get('name') or '(unnamed)', tests))
 
-          # ── build sections ─────────────────────────────────────────────────
-          EQ  = '=' * 68
-          DIV = '-' * 68
+          EQ  = '=' * WIDTH
+          DIV = '-' * WIDTH
+          out = []
 
-          # 1) Header
-          overall = 'ALL TESTS PASSED' if total_fail == 0 else f'{total_fail} TEST(S) FAILED'
-          out = [
+          # Header
+          status_word = 'ALL TESTS PASSED' if total_fail == 0 else f'{total_fail} TEST(S) FAILED'
+          out += [
               EQ,
-              'API REGRESSION TEST REPORT',
+              ' API REGRESSION TEST REPORT'.center(WIDTH),
               EQ,
               '',
-              f'  Result   : {overall}',
-              f'  Passed   : {total_pass} / {total}  ({pass_pct}%)',
-              f'  Failed   : {total_fail}',
-              f'  Skipped  : {total_skip}',
-              f'  Run URL  : {run_url}',
+              f"  Result    : {status_word}",
+              f"  Pass rate : {total_pass} / {total}  ({pass_pct}%)",
+              f"  Failed    : {total_fail}",
+              f"  Skipped   : {total_skip}",
+              f"  Duration  : {total_dur}",
+              f"  Run URL   : {run_url}",
               '',
           ]
 
-          # 2) Suite summary (one row per .robot file)
-          out += [EQ, 'SUITE SUMMARY', EQ, '']
-          out.append(f'  {"Suite":<46} {"Pass":>5} {"Fail":>5} {"Skip":>5}')
-          out.append(f'  {DIV[:46]} {"-"*5} {"-"*5} {"-"*5}')
+          # Suite summary
+          out += [EQ, ' SUITE SUMMARY', EQ, '']
+          out.append(f"  {'Status':<6} {'Suite':<{NAME_W}} {'Pass':>5} {'Fail':>5} {'Skip':>5}")
+          out.append(f"  {'-'*6} {'-'*NAME_W} {'-'*5} {'-'*5} {'-'*5}")
           for name, tests in suites:
-              p = sum(1 for t in tests if t.find('status').get('status') == 'PASS')
+              p  = sum(1 for t in tests if t.find('status').get('status') == 'PASS')
               f_ = sum(1 for t in tests if t.find('status').get('status') == 'FAIL')
-              s = sum(1 for t in tests if t.find('status').get('status') not in ('PASS', 'FAIL'))
-              tag = '   ' if f_ == 0 else 'FAIL'
-              out.append(f'  {tag} {name:<42} {p:>5} {f_:>5} {s:>5}')
+              s  = sum(1 for t in tests if t.find('status').get('status') not in ('PASS', 'FAIL'))
+              tag = '[OK]  ' if f_ == 0 else '[FAIL]'
+              short = name if len(name) <= NAME_W else name[:NAME_W - 1] + '…'
+              out.append(f"  {tag} {short:<{NAME_W}} {p:>5} {f_:>5} {s:>5}")
+          out.append(f"  {'-'*6} {'-'*NAME_W} {'-'*5} {'-'*5} {'-'*5}")
+          out.append(f"  {'TOTAL':<6} {'':<{NAME_W}} {total_pass:>5} {total_fail:>5} {total_skip:>5}")
           out += ['']
 
-          # 3) Failures section — the most important part
-          failures = []
-          for suite_name, tests in suites:
-              for t in tests:
-                  if t.find('status').get('status') != 'FAIL':
-                      continue
-                  st  = t.find('status')
-                  raw = (st.text or '').strip() or (st.get('message') or '').strip()
-                  parsed   = parse_message(raw)
-                  api_logs = extract_api_payload_from_logs(t)
-                  failures.append({
-                      'suite':    suite_name,
-                      'test':     t.get('name'),
-                      'elapsed':  float(st.get('elapsed', 0)),
-                      'summary':  parsed['summary'],
-                      'fields':   parsed['fields'],
-                      'raw':      raw,
-                      'api_logs': api_logs,
-                  })
+          # Failures
+          failing_suites = [(n, ts) for n, ts in suites
+                            if any(t.find('status').get('status') == 'FAIL' for t in ts)]
+          if failing_suites:
+              out += [EQ, f' FAILURES ({total_fail} test(s))', EQ]
+              fail_idx = 0
+              for suite_name, tests in failing_suites:
+                  out += ['', f"  ── {suite_name} " + '─' * max(0, WIDTH - 6 - len(suite_name))]
+                  for t in tests:
+                      st = t.find('status')
+                      if st.get('status') != 'FAIL':
+                          continue
+                      fail_idx += 1
+                      raw = (st.text or '').strip() or (st.get('message') or '').strip()
+                      elapsed = float(st.get('elapsed', 0))
+                      step_strings = split_into_steps(raw)
 
-          if failures:
-              out += [EQ, f'FAILURES ({len(failures)})', EQ]
-              for i, f in enumerate(failures, 1):
-                  out += [
-                      '',
-                      f'  [{i}] {f["suite"]}  ›  {f["test"]}   ({f["elapsed"]:.2f}s)',
-                      f'      ' + DIV[:62],
-                  ]
-                  if f['summary']:
-                      out.append(f'      Summary : {f["summary"][:300]}')
-                  # Render any structured fields we extracted
-                  if f['fields']:
-                      # Common, useful keys first; anything else after.
-                      preferred = ['expected', 'got', 'success', 'msg',
-                                   'message', 'mark', 'uid', 'status',
-                                   'erp', 'series']
-                      seen = set()
-                      for key in preferred:
-                          if key in f['fields']:
-                              out.append(f'      {key:<8}: {f["fields"][key][:280]}')
-                              seen.add(key)
-                      for key, val in f['fields'].items():
-                          if key not in seen:
-                              out.append(f'      {key:<8}: {val[:280]}')
-                  # If parsing yielded nothing, show the raw message
-                  if not f['summary'] and not f['fields']:
-                      out.append(f'      Raw     : {f["raw"][:400]}')
-                  # If any API response was logged, surface the most useful one
-                  if f['api_logs'] and 'msg' not in f['fields'] and 'message' not in f['fields']:
-                      out.append('      API log :')
-                      for level, text in f['api_logs'][:3]:
-                          out.append(f'        [{level}] {text}')
+                      out += ['', f"  [{fail_idx}] {t.get('name')}  ({elapsed:.2f}s)"]
+
+                      if len(step_strings) <= 1:
+                          parsed = parse_step(step_strings[0]) if step_strings \
+                                   else {'summary': raw, 'fields': {}}
+                          render_parsed(out, parsed, indent=6)
+                      else:
+                          out.append(f"      {len(step_strings)} failing step(s):")
+                          for n, step in enumerate(step_strings, 1):
+                              parsed = parse_step(step)
+                              out.append('')
+                              out.append(f"      Step {n}:")
+                              render_parsed(out, parsed, indent=8)
               out += ['']
 
-          # 4) Per-suite detailed listing (compact: passes shown, fails repeated
-          #    briefly so you see context)
-          out += [EQ, 'DETAILED RESULTS PER SUITE', EQ]
+          # Per-suite detailed listing
+          out += [EQ, ' DETAILED RESULTS PER SUITE', EQ]
           for suite_name, tests in suites:
               passes = [t for t in tests if t.find('status').get('status') == 'PASS']
               fails  = [t for t in tests if t.find('status').get('status') == 'FAIL']
               skips  = [t for t in tests if t.find('status').get('status') not in ('PASS', 'FAIL')]
               status_word = 'ALL PASSING' if not fails else f'{len(fails)} FAILED'
-              out += ['', DIV, f'SUITE: {suite_name}  [{status_word}]', DIV]
+              out += ['', DIV, f" {suite_name}  [{status_word}]", DIV]
               if passes:
-                  out.append(f'  Passed ({len(passes)}):')
+                  out.append(f"  Passed ({len(passes)}):")
                   for t in passes:
                       el = float(t.find('status').get('elapsed', 0))
-                      out.append(f'    + {t.get("name")} ({el:.2f}s)')
+                      out.append(f"    +  {t.get('name'):<{NAME_W}}  ({el:.2f}s)")
               if fails:
-                  out.append(f'  Failed ({len(fails)}):')
+                  out.append(f"  Failed ({len(fails)}):")
                   for t in fails:
                       el  = float(t.find('status').get('elapsed', 0))
                       raw = (t.find('status').text or '').strip()
-                      parsed = parse_message(raw)
-                      api_msg = parsed['fields'].get('msg') or parsed['fields'].get('message', '')
-                      tail = f'   →  {api_msg}' if api_msg else ''
-                      out.append(f'    - {t.get("name")} ({el:.2f}s){tail}')
+                      step_strings = split_into_steps(raw)
+                      first = parse_step(step_strings[0]) if step_strings else {'fields': {}}
+                      api_msg = first['fields'].get('message', '') or first['fields'].get('msg', '')
+                      tail = f"  → {api_msg[:120]}" if api_msg else ''
+                      multi = f" [{len(step_strings)} steps]" if len(step_strings) > 1 else ''
+                      out.append(f"    -  {t.get('name'):<{NAME_W}}  ({el:.2f}s){multi}{tail}")
               if skips:
-                  out.append(f'  Skipped ({len(skips)}):')
+                  out.append(f"  Skipped ({len(skips)}):")
                   for t in skips:
-                      out.append(f'    ~ {t.get("name")}')
+                      out.append(f"    ~  {t.get('name')}")
 
           out += ['', EQ, '']
           write('\n'.join(out))

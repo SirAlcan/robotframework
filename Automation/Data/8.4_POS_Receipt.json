@@ -6,7 +6,7 @@
     "number": "OVERWRITTEN_AT_RUNTIME",
     "dateIssued": "OVERWRITTEN_AT_RUNTIME",
     "invoiceType": "POS Return Receipt",
-    "invoiceTypeCode": "8.5",
+    "invoiceTypeCode": "8.4",
     "documentTypeCode": "INVOICE",
     "thirdPartyCollection": false,
     "providerSignatureIdentifier": "OVERWRITTEN_AT_RUNTIME",

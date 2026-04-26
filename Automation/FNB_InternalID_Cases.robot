@@ -25,8 +25,8 @@ Build Payload
     [Arguments]    ${version}    ${case_letter}    ${relative_series}    ${internal_id}    ${number}=999001
     ${full_series}=    Build Series    ${case_letter}    ${relative_series}
     ${payload_file}=   Set Variable If    '${version}' == 'v1'
-    ...    Automation/data/payload_v1.json
-    ...    Automation/data/payload_v2.json
+    ...    Automation/data/8.6_Debit_FNB_Internalv1.json
+    ...    Automation/data/8.6_Debit_FNB_Internalv2.json
     ${payload_str}=    Get File    ${payload_file}
     ${now}=            Get Current Date    result_format=%Y-%m-%dT%H:%M:%S
     ${payload_str}=    Replace String    ${payload_str}    SERIES_PLACEHOLDER       ${full_series}

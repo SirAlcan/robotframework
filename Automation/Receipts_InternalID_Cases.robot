@@ -33,7 +33,7 @@ ${BASE_URL}                    https://einvoiceapiuat.impact.gr
 ${ENDPOINT}                    /Receipt
 # Set via: robot -v API_KEY:xxxxx ...    or    export EINVOICE_API_KEY=xxxxx
 ${API_KEY}                     03ac2ca0-2815-41eb-894f-9d3a80c6c9da
-${TEMPLATE_FILE}               ${CURDIR}/Data/v2_template.json
+${TEMPLATE_FILE}               ${CURDIR}/Data/8.4_POS_Receipt.json
 
 # v1/v2 only differ in totalAmount (header + line). UID is unaffected.
 ${V1_TOTAL_AMOUNT}             ${124}

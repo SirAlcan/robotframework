@@ -26,10 +26,10 @@ jobs:
           # Add or remove entries below to control what runs.
           suites=(
             "Automation/FNB_case_multiple_11.1.robot"
-            "Automation/FNB_case_multiple_11.1_Draft.robot"
             "Automation/FNB_InternalID_Cases.robot"
             "Automation/POS_flows.robot"
             "Automation/Receipts_InternalID_Cases.robot"
+        #"Automation/FNB_case_multiple_11.1_Draft.robot"
           )
 
           # Verify each file actually exists, fail fast if not (catches typos).

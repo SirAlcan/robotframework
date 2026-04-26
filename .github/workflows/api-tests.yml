@@ -6,20 +6,47 @@ on:
     - cron: '0 14 * * *'
   workflow_dispatch:
 
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-
 jobs:
+  # --------------------------------------------------------------------------
+  # 1) Build the list of suites to run.
+  #    To add/remove a suite, edit the SUITES env var below.
+  # --------------------------------------------------------------------------
   discover:
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.set.outputs.matrix }}
+    env:
+      SUITES: |
+        Automation/FNB_case_multiple_11.1.robot
+        Automation/FNB_InternalID_Cases.robot
+        Automation/POS_flows.robot
+        Automation/Receipts_InternalID_Cases.robot
     steps:
-      - uses: actions/checkout@v4.2.2
+      - uses: actions/checkout@v4
 
       - id: set
-        run: bash .github/scripts/discover_api_suites.sh
+        shell: bash
+        run: |
+          python3 - <<'PYEOF'
+          import json, os, sys
+          raw = os.environ.get("SUITES", "").splitlines()
+          suites = [s.strip() for s in raw if s.strip()]
+          missing = [s for s in suites if not os.path.isfile(s)]
+          if missing:
+              for m in missing:
+                  print(f"ERROR: Suite not found in repo: {m}", file=sys.stderr)
+              sys.exit(1)
+          out = os.environ["GITHUB_OUTPUT"]
+          with open(out, "a", encoding="utf-8") as f:
+              f.write("matrix=" + json.dumps({"suite": suites}) + "\n")
+          print("Suites to run:")
+          for s in suites:
+              print(f"  - {s}")
+          PYEOF
 
+  # --------------------------------------------------------------------------
+  # 2) Run each suite in its own job, in parallel.
+  # --------------------------------------------------------------------------
   test:
     needs: discover
     if: needs.discover.outputs.matrix != ''
@@ -27,9 +54,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.discover.outputs.matrix) }}
-
     steps:
-      - uses: actions/checkout@v4.2.2
+      - uses: actions/checkout@v4
 
       - uses: actions/setup-python@v5
         with:
@@ -40,8 +66,8 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Compute suite slug
-        id: slug
+      - id: slug
+        shell: bash
         run: |
           slug=$(echo '${{ matrix.suite }}' | sed -E 's|^Automation/||; s|\.robot$||; s|[/ ]|_|g')
           echo "slug=$slug" >> "$GITHUB_OUTPUT"
@@ -49,24 +75,32 @@ jobs:
       - name: Run ${{ matrix.suite }}
         env:
           EINVOICE_API_KEY: ${{ secrets.EINVOICE_API_KEY }}
+        shell: bash
         run: |
           mkdir -p results
-          robot --outputdir results --output output.xml --log log.html --report report.html "${{ matrix.suite }}"
+          robot --outputdir results \
+                --output output.xml \
+                --log log.html \
+                --report report.html \
+                "${{ matrix.suite }}"
 
       - name: Upload per-suite artifact
         if: always()
-        uses: actions/upload-artifact@v4.6.2
+        uses: actions/upload-artifact@v4
         with:
           name: api-results-${{ steps.slug.outputs.slug }}
           path: results/
           retention-days: 14
 
+  # --------------------------------------------------------------------------
+  # 3) Merge all per-suite outputs and send a single email report.
+  # --------------------------------------------------------------------------
   report:
     needs: test
     if: always()
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4.2.2
+      - uses: actions/checkout@v4
 
       - uses: actions/setup-python@v5
         with:
@@ -85,27 +119,110 @@ jobs:
           merge-multiple: false
 
       - name: Merge results with rebot
-        run: bash .github/scripts/merge_results.sh
+        id: merge
+        shell: bash
+        run: |
+          mkdir -p combined
+          python3 - <<'PYEOF'
+          import glob, os, subprocess, sys
+          outputs = sorted(glob.glob("artifacts/**/output.xml", recursive=True))
+          if not outputs:
+              print("No output.xml files found. Skipping merge.")
+              with open(os.environ["GITHUB_OUTPUT"], "a") as f:
+                  f.write("merged=false\n")
+              sys.exit(0)
+          print(f"Merging {len(outputs)} suite output(s):")
+          for o in outputs:
+              print(f"  - {o}")
+          rc = subprocess.call([
+              "rebot",
+              "--name", "API Regression Suite",
+              "--outputdir", "combined",
+              "--output", "output.xml",
+              "--log", "log.html",
+              "--report", "report.html",
+              *outputs,
+          ])
+          # rebot returns the number of failed tests; merge itself succeeded.
+          with open(os.environ["GITHUB_OUTPUT"], "a") as f:
+              f.write("merged=true\n")
+          print(f"rebot exit code: {rc}")
+          PYEOF
 
       - name: Upload combined report
-        if: always()
-        uses: actions/upload-artifact@v4.6.2
+        if: steps.merge.outputs.merged == 'true'
+        uses: actions/upload-artifact@v4
         with:
           name: api-combined-report
           path: combined/
 
-      - name: Parse combined results
+      - name: Build email body
         if: always()
-        run: python3 .github/scripts/build_email_body.py
-
-      - name: Read Email Body
-        if: always()
+        shell: bash
         run: |
-          {
-            echo "EMAIL_BODY<<EOF"
-            cat email_body.txt
-            echo "EOF"
-          } >> $GITHUB_ENV
+          python3 - <<'PYEOF'
+          import os
+          import xml.etree.ElementTree as ET
+
+          OUT_XML = 'combined/output.xml'
+          EMAIL_FILE = 'email_body.txt'
+
+          def write(text):
+              with open(EMAIL_FILE, 'w', encoding='utf-8') as f:
+                  f.write(text)
+
+          if not os.path.exists(OUT_XML):
+              write("No combined output.xml produced. Check per-suite artifacts to see what failed.")
+              raise SystemExit(0)
+
+          tree = ET.parse(OUT_XML)
+          root = tree.getroot()
+          stats = root.find('.//total/stat')
+          total_pass = stats.get('pass')
+          total_fail = stats.get('fail')
+          total_skip = stats.get('skip')
+
+          suites = {}
+          for suite in root.iter('suite'):
+              tests = suite.findall('test')
+              if not tests:
+                  continue
+              suites[suite.get('name') or '(unnamed)'] = tests
+
+          blocks = []
+          for suite_name, tests in suites.items():
+              lines = [f"\n  [SUITE] {suite_name}"]
+              for t in tests:
+                  name = t.get('name')
+                  st = t.find('status')
+                  result = st.get('status')
+                  elapsed = float(st.get('elapsed', 0))
+                  icon = '[PASS]' if result == 'PASS' else ('[FAIL]' if result == 'FAIL' else '[SKIP]')
+                  msg = ''
+                  if result == 'FAIL':
+                      m = (st.get('message') or '').strip() or (st.text or 'N/A').strip()
+                      msg = f"\n        Error: {m[:300]}"
+                  lines.append(f"    {icon} {name} ({elapsed:.2f}s){msg}")
+              blocks.append('\n'.join(lines))
+
+          details = '\n'.join(blocks) if blocks else '  (no tests found)'
+          repo = os.environ.get('GITHUB_REPOSITORY', '')
+          run_id = os.environ.get('GITHUB_RUN_ID', '')
+
+          body = (
+              "API Regression Test Report\n"
+              "==========================\n\n"
+              "Totals:\n"
+              f"  Passed : {total_pass}\n"
+              f"  Failed : {total_fail}\n"
+              f"  Skipped: {total_skip}\n\n"
+              "Per suite / test case:\n"
+              f"{details}\n\n"
+              "Full report (artifacts):\n"
+              f"https://github.com/{repo}/actions/runs/{run_id}\n"
+          )
+          write(body)
+          PYEOF
 
       - name: Send Email Report
         if: always()
@@ -117,6 +234,6 @@ jobs:
           password: ${{ secrets.EMAIL_PASSWORD }}
           to: gkazakou@impact.gr
           from: GitHub Actions <${{ secrets.EMAIL_USERNAME }}>
-          subject: "🤖 API Regression Test Report - ${{ needs.test.result }}"
-          body: ${{ env.EMAIL_BODY }}
+          subject: "API Regression Test Report - ${{ needs.test.result }}"
+          body: file://email_body.txt
           attachments: combined/output.xml, combined/log.html, combined/report.html

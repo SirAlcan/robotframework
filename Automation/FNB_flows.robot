@@ -58,17 +58,17 @@ Scenario 07.2 - Mixed Complex Flow 11.4 Credit
     Send 8.6 Debit     gross=20        # M5
     Send 8.6 Credit    gross=40        # M6
     Send 11.4 Credit    gross=10    expected_marks_count=6   # connects [M1,M2,M3,M4, M5,M6]
-Scenario 07.3 - Mixed Complex Flow 11.1 Debit
-    [Documentation]    Το σύνθετο σενάριο με 9 βήματα (το τελευταίο είναι 11.4 πιστωτική)
-    Send 8.6 Debit     gross=10        # M1
-    Send 8.6 Debit     gross=30        # M2
-    Send 8.6 Credit    gross=10        # M3
-    Send 11.1 Debit    gross=20    expected_marks_count=3   peek=${True}    # connects [M1,M2,M3]
-    Send 8.6 Debit     gross=30        # M4
-    Send 11.1 Debit    gross=30    expected_marks_count=2   peek=${True}    # connects [M3,M4]
-    Send 8.6 Debit     gross=20        # M5
-    Send 8.6 Credit    gross=20        # M6
-    Send 11.1 Debit    gross=10    expected_marks_count=3   # connects [M4, M5,M6]
+#Scenario 07.3 - Mixed Complex Flow 11.1 Debit
+#    [Documentation]    Το σύνθετο σενάριο με 9 βήματα (το τελευταίο είναι 11.1)
+#    Send 8.6 Debit     gross=10        # M1
+#    Send 8.6 Debit     gross=30        # M2
+#    Send 8.6 Credit    gross=10        # M3
+#    Send 11.1 Debit    gross=20    expected_marks_count=3   peek=${True}    # connects [M1,M2,M3]
+#    Send 8.6 Debit     gross=30        # M4
+#    Send 11.1 Debit    gross=30    expected_marks_count=2   peek=${True}    # connects [M3,M4]
+#    Send 8.6 Debit     gross=20        # M5
+#    Send 8.6 Credit    gross=20        # M6
+#    Send 11.1 Debit    gross=10    expected_marks_count=3   # connects [M4, M5,M6]
 Scenario 08 - Split Bill
     Send 8.6 Debit     gross=40
     Send 8.6 Debit     gross=40

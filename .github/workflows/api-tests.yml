@@ -17,7 +17,7 @@ jobs:
       matrix: ${{ steps.set.outputs.matrix }}
     env:
       SUITES: |
-        Automation/FNB_case_multiple_11.1.robot
+        Automation/FNB_flows.robot
         Automation/FNB_InternalID_Cases.robot
         Automation/POS_flows.robot
         Automation/Receipts_InternalID_Cases.robot

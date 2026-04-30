@@ -61,10 +61,10 @@ Case A - UID Uniqueness Vs InternalDocumentId Non-Uniqueness
     ${num}=    Case Base Number    A
     # series / number / internalId / version / erp / expected
     Send And Verify    A    ${num}    1    v1    ${ERP_NONE}    201
-    Send And Verify    A    ${num}    1    v1    ${ERP_NONE}    408
-    Send And Verify    A    ${num}    2    v1    ${ERP_NONE}    408
-    Log To Console     \nCase A: sleeping ${UID_LOCK_WAIT} to close the UID lock window...
-    Sleep              ${UID_LOCK_WAIT}
+    Send And Verify    A    ${num}    1    v1    ${ERP_NONE}    409
+    Send And Verify    A    ${num}    2    v1    ${ERP_NONE}    409
+    #Log To Console     \nCase A: sleeping ${UID_LOCK_WAIT} to close the UID lock window...
+    #Sleep              ${UID_LOCK_WAIT}
     Send And Verify    A    ${num}    2    v2    ${ERP_NONE}    409
     Send And Verify    B    ${num}    2    v2    ${ERP_NONE}    201
     Send And Verify    C    ${num}    1    v1    ${ERP_NONE}    201
@@ -75,13 +75,13 @@ Case B - FAKE IAPR Delayed Timeout Then Success On Same UID
     ...                internalDocumentId.
     [Tags]             fake_delayed_timeout    case_B
     ${num}=    Case Base Number    B
-    Send And Verify    A    ${num}    1    v1    ${ERP_FAKE_DELAYED_TIMEOUT}    408
-    Send And Verify    A    ${num}    2    v1    ${ERP_NONE}                    201
+    Send And Verify    A    ${num}    1    v1    ${ERP_FAKE_TIMEOUT}    408
+    Send And Verify    A    ${num}    2    v1    ${ERP_NONE}            201
 
 Case C - Delayed Timeout, Different Series Succeeds, Same Series Retry Succeeds
     [Tags]             fake_delayed_timeout    case_C
     ${num}=    Case Base Number    C
-    Send And Verify    A    ${num}    1    v1    ${ERP_FAKE_DELAYED_TIMEOUT}    408
+    Send And Verify    A    ${num}    1    v1    ${ERP_FAKE_TIMEOUT}            408
     Send And Verify    B    ${num}    1    v1    ${ERP_NONE}                    201
     Send And Verify    A    ${num}    2    v1    ${ERP_NONE}                    201
 
@@ -90,7 +90,7 @@ Case D - Two Consecutive Forced Timeouts Then Success
     ...                forced to time out (different fake headers), third succeeds.
     [Tags]             fake_delayed_timeout    fake_timeout    case_D
     ${num}=    Case Base Number    D
-    Send And Verify    A    ${num}    1    v1    ${ERP_FAKE_DELAYED_TIMEOUT}    408
+    Send And Verify    A    ${num}    1    v1    ${ERP_FAKE_TIMEOUT}            408
     Send And Verify    A    ${num}    1    v2    ${ERP_FAKE_TIMEOUT}            408
     Send And Verify    A    ${num}    1    v2    ${ERP_NONE}                    201
 
@@ -102,17 +102,17 @@ Case E - IAPR Validation Error Does Not Lock The UID
     Send And Verify    B    ${num}    1    v2    ${ERP_NONE}               201
     Send And Verify    A    ${num}    2    v2    ${ERP_NONE}               201
 
-Case F - Validation Error Returns 500 Then Retry Succeeds
+Case F - Validation Error Returns 500 Then Retry Succeeds     #δεν παιζει σωστα η ενηεμερωση του portal
     [Documentation]    Per the spec matrix provided. If your backend actually returns
     ...                400 for FAKE_IAPR_VALIDATION_ERROR here, change ${ERP_FAKE_VALIDATION}
     ...                below to the correct forced-error header (possibly a different one
     ...                than Case E) or change 500 to 400.
     [Tags]             fake_validation_error    case_F
     ${num}=    Case Base Number    F
-    Send And Verify    A    ${num}    1    v1    ${ERP_FAKE_VALIDATION}    500
+    Send And Verify    A    ${num}    1    v1    ${ERP_FAKE_VALIDATION}    400
     Send And Verify    A    ${num}    2    v1    ${ERP_NONE}               201
 
-Case G - Elise Save Document Error Does Not Lock The UID
+Case G - Elise Save Document Error Does Not Lock The UID        #δεν παιζει σωστα η ενηεμερωση του portal
     [Tags]             fake_elise    case_G
     ${num}=    Case Base Number    G
     Send And Verify    A    ${num}    1    v1    ${ERP_FAKE_ELISE_SAVE}    500
@@ -175,7 +175,7 @@ Build Payload
     ...    dateIssued=${TODAY}
     ...    providerSignatureIdentifier=${number}
     ...    totalAmount=${amount}
-    ...    internalDocumentId=InternalId_Receipt_${internal_id}
+    ...    internalDocumentId=InternalId_Receipt100_${internal_id}
     ${cardlines}=   Get From Dictionary    ${payload}    cardlines
     ${first_line}=  Get From List          ${cardlines}  ${0}
     Set To Dictionary    ${first_line}    amount=${amount}

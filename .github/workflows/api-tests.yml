@@ -65,13 +65,21 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-
+      - name: Create credentials file from secrets
+        env:
+          EINVOICE_API_KEY: ${{ secrets.EINVOICE_API_KEY }}
+        shell: bash
+        run: |
+          mkdir -p config
+          cat > config/credentials.py << EOF
+          EINVOICE_API_KEY = "${EINVOICE_API_KEY}"
+          ISSUER_VAT       = "EL154697391"
+          EOF
       - id: slug
         shell: bash
         run: |
           slug=$(echo '${{ matrix.suite }}' | sed -E 's|^Automation/||; s|\.robot$||; s|[/ ]|_|g')
           echo "slug=$slug" >> "$GITHUB_OUTPUT"
-
       - name: Run ${{ matrix.suite }}
         env:
           EINVOICE_API_KEY: ${{ secrets.EINVOICE_API_KEY }}

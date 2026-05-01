@@ -1,3 +1,74 @@
+*** Test Cases ***
+TC 01 - UID Uniqueness Vs InternalDocumentId Non-Uniqueness
+    [Documentation]    Same UID: 1st ok -> 2nd/3rd concurrent 408 -> 4th (after window) 409.
+    ...                Then different series (different UID) succeed even though
+    ...                internalDocumentId repeats. Proves internalDocumentId is NOT
+    ...                part of the uniqueness check.
+    [Tags]             uniqueness    case_A
+    ${num}=    Case Base Number    A
+    # series / number / internalId / version / erp / expected
+    Send And Verify    A    ${num}    1    v1    ${ERP_NONE}    201
+    Send And Verify    A    ${num}    1    v1    ${ERP_NONE}    409
+    Send And Verify    A    ${num}    2    v1    ${ERP_NONE}    409
+    #Log To Console     \nCase A: sleeping ${UID_LOCK_WAIT} to close the UID lock window...
+    #Sleep              ${UID_LOCK_WAIT}
+    Send And Verify    A    ${num}    2    v2    ${ERP_NONE}    409
+    Send And Verify    B    ${num}    2    v2    ${ERP_NONE}    201
+    Send And Verify    C    ${num}    1    v1    ${ERP_NONE}    201
+
+TC 02 - FAKE IAPR Delayed Timeout Then Success On Same UID
+    [Documentation]    Forced delayed-timeout on first try; the same UID (same series,
+    ...                same number) is accepted on the retry with a different
+    ...                internalDocumentId.
+    [Tags]             fake_delayed_timeout    case_B
+    ${num}=    Case Base Number    B
+    Send And Verify    A    ${num}    1    v1    ${ERP_FAKE_TIMEOUT}    408
+    Send And Verify    A    ${num}    2    v1    ${ERP_NONE}            201
+
+TC 03 - Delayed Timeout, Different Series Succeeds, Same Series Retry Succeeds
+    [Tags]             fake_delayed_timeout    case_C
+    ${num}=    Case Base Number    C
+    Send And Verify    A    ${num}    1    v1    ${ERP_FAKE_TIMEOUT}            408
+    Send And Verify    B    ${num}    1    v1    ${ERP_NONE}                    201
+    Send And Verify    A    ${num}    2    v1    ${ERP_NONE}                    201
+
+TC 04 - Two Consecutive Forced Timeouts Then Success
+    [Documentation]    Same series+number across all three requests. First two are
+    ...                forced to time out (different fake headers), third succeeds.
+    [Tags]             fake_delayed_timeout    fake_timeout    case_D
+    ${num}=    Case Base Number    D
+    Send And Verify    A    ${num}    1    v1    ${ERP_FAKE_TIMEOUT}            408
+    Send And Verify    A    ${num}    1    v2    ${ERP_FAKE_TIMEOUT}            408
+    Send And Verify    A    ${num}    1    v2    ${ERP_NONE}                    201
+
+TC 05 - IAPR Validation Error Does Not Lock The UID        #δεν παιζει σωστα η ενημερωση του portal
+    [Tags]             fake_validation_error    case_E
+    ${num}=    Case Base Number    E
+    Send And Verify    A    ${num}    1    v1    ${ERP_FAKE_VALIDATION}    400
+    Send And Verify    A    ${num}    2    v1    ${ERP_FAKE_VALIDATION}    400
+    Send And Verify    B    ${num}    1    v2    ${ERP_NONE}               201
+    Send And Verify    A    ${num}    2    v2    ${ERP_NONE}               201    #*
+
+TC 06 - Validation Error Returns 500 Then Retry Succeeds     #δεν παιζει σωστα η ενημερωση του portal
+    [Documentation]    Per the spec matrix provided. If your backend actually returns
+    ...                400 for FAKE_IAPR_VALIDATION_ERROR here, change ${ERP_FAKE_VALIDATION}
+    ...                below to the correct forced-error header (possibly a different one
+    ...                than Case E) or change 500 to 400.
+    [Tags]             fake_validation_error    case_F
+    ${num}=    Case Base Number    F
+    Send And Verify    A    ${num}    1    v1    ${ERP_FAKE_VALIDATION}    400
+    Send And Verify    A    ${num}    2    v1    ${ERP_NONE}               201        #*
+
+TC 07 - Elise Save Document Error Does Not Lock The UID        #δεν παιζει σωστα η ενηεμερωση του portal, να βαλουμε internal page για τα 8.4, history να δουμε και το issuedate του portal
+    [Tags]             fake_elise    case_G
+    ${num}=    Case Base Number    G
+    Send And Verify    A    ${num}    1    v1    ${ERP_FAKE_ELISE_SAVE}    500
+    Send And Verify    B    ${num}    1    v1    ${ERP_NONE}               201
+    Log To Console     \nCase A: sleeping ${UID_LOCK_WAIT} to close the UID lock window...
+    Sleep              ${UID_LOCK_WAIT}
+    Send And Verify    A    ${num}    1    v2    ${ERP_NONE}               201
+
+
 *** Settings ***
 Documentation     API test suite for POST /Receipt on einvoiceapiuat.impact.gr.
 ...
@@ -24,6 +95,7 @@ Library           Collections
 Library           String
 Library           DateTime
 Library           OperatingSystem
+Variables         ${EXECDIR}/config/credentials.py
 
 Suite Setup       Initialize Suite
 
@@ -32,7 +104,7 @@ Suite Setup       Initialize Suite
 ${BASE_URL}                    https://einvoiceapiuat.impact.gr
 ${ENDPOINT}                    /Receipt
 # Set via: robot -v API_KEY:xxxxx ...    or    export EINVOICE_API_KEY=xxxxx
-${API_KEY}                     03ac2ca0-2815-41eb-894f-9d3a80c6c9da
+${API_KEY}                     ${EINVOICE_API_KEY}
 ${TEMPLATE_FILE}               ${CURDIR}/Data/8.4_POS_Receipt.json
 
 # v1/v2 only differ in totalAmount (header + line). UID is unaffected.
@@ -51,73 +123,6 @@ ${ERP_FAKE_ELISE_SAVE}         FAKE_ELISE_SAVE_DOCUMENT_ERROR
 ${UID_LOCK_WAIT}               2m 10s
 
 
-*** Test Cases ***
-Case A - UID Uniqueness Vs InternalDocumentId Non-Uniqueness
-    [Documentation]    Same UID: 1st ok -> 2nd/3rd concurrent 408 -> 4th (after window) 409.
-    ...                Then different series (different UID) succeed even though
-    ...                internalDocumentId repeats. Proves internalDocumentId is NOT
-    ...                part of the uniqueness check.
-    [Tags]             uniqueness    case_A
-    ${num}=    Case Base Number    A
-    # series / number / internalId / version / erp / expected
-    Send And Verify    A    ${num}    1    v1    ${ERP_NONE}    201
-    Send And Verify    A    ${num}    1    v1    ${ERP_NONE}    409
-    Send And Verify    A    ${num}    2    v1    ${ERP_NONE}    409
-    #Log To Console     \nCase A: sleeping ${UID_LOCK_WAIT} to close the UID lock window...
-    #Sleep              ${UID_LOCK_WAIT}
-    Send And Verify    A    ${num}    2    v2    ${ERP_NONE}    409
-    Send And Verify    B    ${num}    2    v2    ${ERP_NONE}    201
-    Send And Verify    C    ${num}    1    v1    ${ERP_NONE}    201
-
-Case B - FAKE IAPR Delayed Timeout Then Success On Same UID
-    [Documentation]    Forced delayed-timeout on first try; the same UID (same series,
-    ...                same number) is accepted on the retry with a different
-    ...                internalDocumentId.
-    [Tags]             fake_delayed_timeout    case_B
-    ${num}=    Case Base Number    B
-    Send And Verify    A    ${num}    1    v1    ${ERP_FAKE_TIMEOUT}    408
-    Send And Verify    A    ${num}    2    v1    ${ERP_NONE}            201
-
-Case C - Delayed Timeout, Different Series Succeeds, Same Series Retry Succeeds
-    [Tags]             fake_delayed_timeout    case_C
-    ${num}=    Case Base Number    C
-    Send And Verify    A    ${num}    1    v1    ${ERP_FAKE_TIMEOUT}            408
-    Send And Verify    B    ${num}    1    v1    ${ERP_NONE}                    201
-    Send And Verify    A    ${num}    2    v1    ${ERP_NONE}                    201
-
-Case D - Two Consecutive Forced Timeouts Then Success
-    [Documentation]    Same series+number across all three requests. First two are
-    ...                forced to time out (different fake headers), third succeeds.
-    [Tags]             fake_delayed_timeout    fake_timeout    case_D
-    ${num}=    Case Base Number    D
-    Send And Verify    A    ${num}    1    v1    ${ERP_FAKE_TIMEOUT}            408
-    Send And Verify    A    ${num}    1    v2    ${ERP_FAKE_TIMEOUT}            408
-    Send And Verify    A    ${num}    1    v2    ${ERP_NONE}                    201
-
-Case E - IAPR Validation Error Does Not Lock The UID
-    [Tags]             fake_validation_error    case_E
-    ${num}=    Case Base Number    E
-    Send And Verify    A    ${num}    1    v1    ${ERP_FAKE_VALIDATION}    400
-    Send And Verify    A    ${num}    2    v1    ${ERP_FAKE_VALIDATION}    400
-    Send And Verify    B    ${num}    1    v2    ${ERP_NONE}               201
-    Send And Verify    A    ${num}    2    v2    ${ERP_NONE}               201
-
-Case F - Validation Error Returns 500 Then Retry Succeeds     #δεν παιζει σωστα η ενηεμερωση του portal
-    [Documentation]    Per the spec matrix provided. If your backend actually returns
-    ...                400 for FAKE_IAPR_VALIDATION_ERROR here, change ${ERP_FAKE_VALIDATION}
-    ...                below to the correct forced-error header (possibly a different one
-    ...                than Case E) or change 500 to 400.
-    [Tags]             fake_validation_error    case_F
-    ${num}=    Case Base Number    F
-    Send And Verify    A    ${num}    1    v1    ${ERP_FAKE_VALIDATION}    400
-    Send And Verify    A    ${num}    2    v1    ${ERP_NONE}               201
-
-Case G - Elise Save Document Error Does Not Lock The UID        #δεν παιζει σωστα η ενηεμερωση του portal
-    [Tags]             fake_elise    case_G
-    ${num}=    Case Base Number    G
-    Send And Verify    A    ${num}    1    v1    ${ERP_FAKE_ELISE_SAVE}    500
-    Send And Verify    B    ${num}    1    v1    ${ERP_NONE}               201
-    Send And Verify    A    ${num}    1    v2    ${ERP_NONE}               201
 
 
 *** Keywords ***

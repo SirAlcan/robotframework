@@ -1,51 +1,5 @@
-*** Settings ***
-Documentation     Multi-step API flow tests for the einvoice UAT environment.
-...
-...               Each test wires together /PosTransactions/signpos,
-...               /Invoice/json, /Receipt, /PosTransactions/validate and
-...               /Invoice/updatePayment, threading mark / signature / input
-...               from one response into the next request.
-...
-...               Flow 1: signpos -> 11.1 (with signpos payment details) -> validate
-...               Flow 2: signpos -> 8.4 receipt (cardlines from signpos) -> validate
-...                       -> 11.1 with multipleConnectedMarks containing 8.4 mark
-...               Flow 3: 11.1 -> signpos for that mark -> updatePayment -> validate
-...               Flow 4: 8.4 receipt -> signpos for that mark -> updatePayment -> validate
-...               Flow 5: 11.1 (x2) -> signpos with invoiceTypeCode 8.4 (sum amount)
-...                       -> 8.4 receipt with signpos payment and the two 11.1 marks
-...                          in multipleConnectedMarks -> validate
-
-Library           helpers.py    WITH NAME    api
-Library           Collections
-Library           String
-Library           DateTime
-Library           OperatingSystem
-
-Suite Setup       Initialize Suite
-Suite Teardown    Finalize Suite
-
-
-*** Variables ***
-${BASE_URL}                    https://einvoiceapiuat.impact.gr
-${API_KEY}                     %{EINVOICE_API_KEY=03ac2ca0-2815-41eb-894f-9d3a80c6c9da}
-${ISSUER_VAT_NO_PREFIX}        154697391
-${ISSUER_VAT}                  EL${ISSUER_VAT_NO_PREFIX}
-${TERMINAL_ID}                 16000198
-${RESULTS_CSV}                 ${CURDIR}${/}flow_results.csv
-
-# Endpoints
-${EP_SIGNPOS}                  /PosTransactions/signpos
-${EP_VALIDATE}                 /PosTransactions/validate
-${EP_INVOICE}                  /Invoice/json
-${EP_RECEIPT}                  /Receipt
-${EP_UPDATE_PAYMENT}           /Invoice/updatePayment
-
-# Default amounts (single-document)
-${AMOUNT_TOTAL}                ${124}
-
-
 *** Test Cases ***
-Flow 1 - signpos then 11.1 with payment details then validate
+TC 01 - signpos then 11.1 with payment details then validate
     [Tags]    flow_1    signpos    invoice    validate
     Begin Case    F1
     ${idn}=    Next Identifier
@@ -65,7 +19,7 @@ Flow 1 - signpos then 11.1 with payment details then validate
     # Step 3 - validate
     Validate Signpos    ${signpos.input}    ${signpos.signature}
 
-Flow 2 - signpos then 8.4 receipt then validate then 11.1 connected to 8.4
+TC 02 - signpos then 8.4 receipt then validate then 11.1 connected to 8.4
     [Tags]    flow_2    signpos    receipt    invoice    validate
     Begin Case    F2
     ${idn}=    Next Identifier
@@ -88,7 +42,7 @@ Flow 2 - signpos then 8.4 receipt then validate then 11.1 connected to 8.4
     ${invoice_payload}=    Build Invoice 11 Payload    ${idn}    ${EMPTY}    ${EMPTY}    ${AMOUNT_TOTAL}    ${connected}
     Send And Verify    step4 invoice 11.1 connected to 8.4    ${EP_INVOICE}    ${invoice_payload}    201
 
-Flow 3 - 11.1 then signpos with mark then updatePayment then validate
+TC 03 - 11.1 then signpos with mark then updatePayment then validate
     [Tags]    flow_3    invoice    signpos    update_payment    validate
     Begin Case    F3
     ${idn}=    Next Identifier
@@ -110,7 +64,7 @@ Flow 3 - 11.1 then signpos with mark then updatePayment then validate
     # Step 4 - validate
     Validate Signpos    ${signpos.input}    ${signpos.signature}
 
-Flow 4 - 8.4 then signpos with mark then updatePayment then validate
+TC 04 - 8.4 then signpos with mark then updatePayment then validate
     [Tags]    flow_4    receipt    signpos    update_payment    validate
     Begin Case    F4
     ${idn}=    Next Identifier
@@ -132,7 +86,7 @@ Flow 4 - 8.4 then signpos with mark then updatePayment then validate
     # Step 4 - validate
     Validate Signpos    ${signpos.input}    ${signpos.signature}
 
-Flow 5 - Two 11.1 then signpos 8.4 then 8.4 receipt connected to both then validate
+TC 05 - Two 11.1 then signpos 8.4 then 8.4 receipt connected to both then validate
     [Tags]    flow_5    invoice    signpos    receipt    validate
     Begin Case    F5
     ${idn_a}=    Next Identifier
@@ -162,6 +116,54 @@ Flow 5 - Two 11.1 then signpos 8.4 then 8.4 receipt connected to both then valid
 
     # Step 5 - validate
     Validate Signpos    ${signpos.input}    ${signpos.signature}
+
+
+*** Settings ***
+Documentation     Multi-step API flow tests for the einvoice UAT environment.
+...
+...               Each test wires together /PosTransactions/signpos,
+...               /Invoice/json, /Receipt, /PosTransactions/validate and
+...               /Invoice/updatePayment, threading mark / signature / input
+...               from one response into the next request.
+...
+...               Flow 1: signpos -> 11.1 (with signpos payment details) -> validate
+...               Flow 2: signpos -> 8.4 receipt (cardlines from signpos) -> validate
+...                       -> 11.1 with multipleConnectedMarks containing 8.4 mark
+...               Flow 3: 11.1 -> signpos for that mark -> updatePayment -> validate
+...               Flow 4: 8.4 receipt -> signpos for that mark -> updatePayment -> validate
+...               Flow 5: 11.1 (x2) -> signpos with invoiceTypeCode 8.4 (sum amount)
+...                       -> 8.4 receipt with signpos payment and the two 11.1 marks
+...                          in multipleConnectedMarks -> validate
+
+Library           helpers.py    WITH NAME    api
+Library           Collections
+Library           String
+Library           DateTime
+Library           OperatingSystem
+Variables         ${EXECDIR}/config/credentials.py
+
+Suite Setup       Initialize Suite
+Suite Teardown    Finalize Suite
+
+
+*** Variables ***
+${BASE_URL}                    https://einvoiceapiuat.impact.gr
+${API_KEY}                     ${EINVOICE_API_KEY}
+${ISSUER_VAT_NO_PREFIX}        154697391
+${ISSUER_VAT}                  EL${ISSUER_VAT_NO_PREFIX}
+${TERMINAL_ID}                 16000198
+${RESULTS_CSV}                 ${CURDIR}${/}flow_results.csv
+
+# Endpoints
+${EP_SIGNPOS}                  /PosTransactions/signpos
+${EP_VALIDATE}                 /PosTransactions/validate
+${EP_INVOICE}                  /Invoice/json
+${EP_RECEIPT}                  /Receipt
+${EP_UPDATE_PAYMENT}           /Invoice/updatePayment
+
+# Default amounts (single-document)
+${AMOUNT_TOTAL}                ${124}
+
 
 
 *** Keywords ***

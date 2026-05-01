@@ -172,13 +172,13 @@ Add Admin User
     Wait Until Element Is Visible    xpath=//span[@data-slot='badge' and contains(., 'Διαχειριστής')]    timeout=5s
 
 *** Test Cases ***
-TC2 Login Success
+TC 01 - Login Success
     Valid Login Test    ${userEmail1}    ${pwd1}
 
-TC3 Select Company Success
+TC 02 - Select Company Success
     Select Company    ${companyTIN1}
 
-TC4 Delete And Recreate Admin User
+TC 03 - Delete And Recreate Admin User
     Navigate To User Management
     Delete User    ${newUserName}
     Add Admin User    ${newUserName}    ${newUserEmail}

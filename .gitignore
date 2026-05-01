@@ -1,0 +1,9 @@
+# Local credentials — never commit
+**/credentials.py
+
+# Robot Framework results
+results/
+log.html
+output.xml
+report.html
+*.xml

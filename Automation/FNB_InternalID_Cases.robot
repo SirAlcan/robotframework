@@ -1,70 +1,5 @@
-*** Settings ***
-Documentation    Case A — Fire all requests with 1sec interval
-Library          OperatingSystem
-Library          RequestsLibrary
-Library          Collections
-Library          DateTime
-Library          String
-
-*** Variables ***
-${BASE_URL}      https://einvoiceapiuat.impact.gr
-${API_KEY}       03ac2ca0-2815-41eb-894f-9d3a80c6c9da
-${VAT1}          EL154697391
-${RUN_PREFIX}    ${EMPTY}
-
-*** Keywords ***
-Generate Run Series Prefix
-    ${now}=    Get Current Date    result_format=%Y%m%d_%H%M%S
-    Set Suite Variable    ${RUN_PREFIX}    ${now}
-
-Build Series
-    [Arguments]    ${case_letter}    ${relative_series}
-    RETURN    ${RUN_PREFIX}_${case_letter}_${relative_series}
-
-Build Payload
-    [Arguments]    ${version}    ${case_letter}    ${relative_series}    ${internal_id}    ${number}=999001
-    ${full_series}=    Build Series    ${case_letter}    ${relative_series}
-    ${payload_file}=   Set Variable If    '${version}' == 'v1'
-    ...    Automation/data/8.6_Debit_FNB_Internalv1.json
-    ...    Automation/data/8.6_Debit_FNB_Internalv2.json
-    ${payload_str}=    Get File    ${payload_file}
-    ${now}=            Get Current Date    result_format=%Y-%m-%dT%H:%M:%S
-    ${payload_str}=    Replace String    ${payload_str}    SERIES_PLACEHOLDER       ${full_series}
-    ${payload_str}=    Replace String    ${payload_str}    INTERNAL_ID_PLACEHOLDER  ${internal_id}
-    ${payload_str}=    Replace String    ${payload_str}    DATE_PLACEHOLDER         ${now}
-    ${payload_str}=    Replace String    ${payload_str}    VAT_PLACEHOLDER          ${VAT1}
-    ${payload_str}=    Replace String    ${payload_str}    NUMBER_PLACEHOLDER       ${number}
-    RETURN    ${payload_str}
-
-Fire Request Async
-    [Arguments]    ${payload_str}    ${erp_value}    ${label}
-    ${python}=    Evaluate    __import__('sys').executable
-    ${result_file}=    Set Variable    C:/tmp/${label}_result.txt
-    ${payload_file}=   Set Variable    C:/tmp/${label}_payload.json
-    Create File    ${payload_file}    ${payload_str}
-    ${p}=    Evaluate
-    ...    __import__('subprocess').Popen([r'${python}', '-c', "import requests; r=requests.post('${BASE_URL}/Invoice/json', data=open(r'${payload_file}').read(), headers={'Content-Type':'application/json','apikey':'${API_KEY}','erp':'${erp_value}'}); open(r'${result_file}','w').write(str(r.status_code)+'SPLIT'+r.text)"])
-    Log    🔥 ${label} fired! (ERP: ${erp_value})    console=yes
-    RETURN    ${p}
-
-Get Async Result
-    [Arguments]    ${label}    ${expected_status}    ${expected_message}=${EMPTY}
-    ${result_file}=    Set Variable    C:/tmp/${label}_result.txt
-    Wait Until Created    ${result_file}    timeout=300s
-    ${content}=         Get File    ${result_file}
-    # Χρήση Python split αντί για Robot Split String
-    ${status_code}=    Evaluate    r'${content}'.split('SPLIT')[0]
-    ${body}=           Evaluate    r'${content}'.split('SPLIT')[1]
-    Log    ${label} → Status: ${status_code}    console=yes
-    Log    ${label} → Body: ${body}    console=yes
-    Should Be Equal As Strings    ${status_code}    ${expected_status}
-    ...    msg=${label} expected ${expected_status} but got ${status_code}
-    Run Keyword If    '${expected_message}' != '${EMPTY}'
-    ...    Should Contain    ${body}    ${expected_message}
-    Log    ✅ ${label} PASS    console=yes
-
 *** Test Cases ***
-TC_A Fire All With 1sec Interval
+TC 01 - Fire All With 1sec Interval
     [Tags]    case_a_fire
     Generate Run Series Prefix
     Log    🚀 Ξεκινάει Case A — 1sec interval μεταξύ requests    console=yes
@@ -317,3 +252,70 @@ TC_G Fire All With 500ms Interval
     Get Async Result    TC_G_03    201
 
     Log    ✅ Case G ολοκληρώθηκε!    console=yes
+
+*** Settings ***
+Documentation    Case A — Fire all requests with 1sec interval
+Library          OperatingSystem
+Library          RequestsLibrary
+Library          Collections
+Library          DateTime
+Library          String
+Variables        ${EXECDIR}/config/credentials.py
+
+*** Variables ***
+${BASE_URL}      https://einvoiceapiuat.impact.gr
+${API_KEY}       ${EINVOICE_API_KEY}
+${VAT1}          EL154697391
+${RUN_PREFIX}    ${EMPTY}
+
+*** Keywords ***
+Generate Run Series Prefix
+    ${now}=    Get Current Date    result_format=%Y%m%d_%H%M%S
+    Set Suite Variable    ${RUN_PREFIX}    ${now}
+
+Build Series
+    [Arguments]    ${case_letter}    ${relative_series}
+    RETURN    ${RUN_PREFIX}_${case_letter}_${relative_series}
+
+Build Payload
+    [Arguments]    ${version}    ${case_letter}    ${relative_series}    ${internal_id}    ${number}=999001
+    ${full_series}=    Build Series    ${case_letter}    ${relative_series}
+    ${payload_file}=   Set Variable If    '${version}' == 'v1'
+    ...    Automation/Data/8.6_Debit_FNB_Internalv1.json
+    ...    Automation/Data/8.6_Debit_FNB_Internalv2.json
+    ${payload_str}=    Get File    ${payload_file}
+    ${now}=            Get Current Date    result_format=%Y-%m-%dT%H:%M:%S
+    ${payload_str}=    Replace String    ${payload_str}    SERIES_PLACEHOLDER       ${full_series}
+    ${payload_str}=    Replace String    ${payload_str}    INTERNAL_ID_PLACEHOLDER  ${internal_id}
+    ${payload_str}=    Replace String    ${payload_str}    DATE_PLACEHOLDER         ${now}
+    ${payload_str}=    Replace String    ${payload_str}    VAT_PLACEHOLDER          ${VAT1}
+    ${payload_str}=    Replace String    ${payload_str}    NUMBER_PLACEHOLDER       ${number}
+    RETURN    ${payload_str}
+
+Fire Request Async
+    [Arguments]    ${payload_str}    ${erp_value}    ${label}
+    ${python}=    Evaluate    __import__('sys').executable
+    ${result_file}=    Set Variable    C:/tmp/${label}_result.txt
+    ${payload_file}=   Set Variable    C:/tmp/${label}_payload.json
+    Create File    ${payload_file}    ${payload_str}
+    ${p}=    Evaluate
+    ...    __import__('subprocess').Popen([r'${python}', '-c', "import requests; r=requests.post('${BASE_URL}/Invoice/json', data=open(r'${payload_file}').read(), headers={'Content-Type':'application/json','apikey':'${API_KEY}','erp':'${erp_value}'}); open(r'${result_file}','w').write(str(r.status_code)+'SPLIT'+r.text)"])
+    Log    🔥 ${label} fired! (ERP: ${erp_value})    console=yes
+    RETURN    ${p}
+
+Get Async Result
+    [Arguments]    ${label}    ${expected_status}    ${expected_message}=${EMPTY}
+    ${result_file}=    Set Variable    C:/tmp/${label}_result.txt
+    Wait Until Created    ${result_file}    timeout=300s
+    ${content}=         Get File    ${result_file}
+    # Χρήση Python split αντί για Robot Split String
+    ${status_code}=    Evaluate    r'${content}'.split('SPLIT')[0]
+    ${body}=           Evaluate    r'${content}'.split('SPLIT')[1]
+    Log    ${label} → Status: ${status_code}    console=yes
+    Log    ${label} → Body: ${body}    console=yes
+    Should Be Equal As Strings    ${status_code}    ${expected_status}
+    ...    msg=${label} expected ${expected_status} but got ${status_code}
+    Run Keyword If    '${expected_message}' != '${EMPTY}'
+    ...    Should Contain    ${body}    ${expected_message}
+    Log    ✅ ${label} PASS    console=yes
+

@@ -1,41 +1,41 @@
 *** Test Cases ***
-Scenario 01 - Simple Close
+TC 01 - Simple Close
     [Documentation]    8.6 debit 50 -> 11.1 debit 50
     Send 8.6 Debit     gross=50
     Send 11.1 Debit    gross=50    expected_marks_count=1
 
-Scenario 02 - Order With Return Before Payment    #check clearance
+TC 02 - Order With Return Before Payment    #check clearance
     [Documentation]    8.6 debit 100 -> 8.6 credit 20 -> 11.1 debit 80
     Send 8.6 Debit     gross=100
     Send 8.6 Credit    gross=20
     Send 11.1 Debit    gross=80    expected_marks_count=2
 
-Scenario 03 - Multiple Orders One Close
+TC 03 - Multiple Orders One Close
     Send 8.6 Debit     gross=25
     Send 8.6 Debit     gross=35
     Send 8.6 Debit     gross=15
     Send 11.1 Debit    gross=75    expected_marks_count=3
 
-Scenario 04 - Two Rounds Same Table
+TC 04 - Two Rounds Same Table
     Send 8.6 Debit     gross=40
     Send 11.1 Debit    gross=40    expected_marks_count=1
     Send 8.6 Debit     gross=30
     Send 11.1 Debit    gross=30    expected_marks_count=1
 
-Scenario 05 - Full Cancellation By Credit And New Order    #check clearance
+TC 05 - Full Cancellation By Credit And New Order    #check clearance
     [Documentation]    Πλήρης επιστροφή με 8.6 credit (όχι cancel) και νέα παραγγελία
     Send 8.6 Debit     gross=60
     Send 8.6 Credit    gross=60
     Send 8.6 Debit     gross=45
     Send 11.1 Debit    gross=45    expected_marks_count=3
 
-Scenario 06 - Return After Receipt With 11 4    #check clearance
+TC 06 - Return After Receipt With 11 4    #check clearance
     [Documentation]    8.6 debit 50 -> 11.1 debit 50 -> 11.4 credit 10 για επιστροφή
     Send 8.6 Debit     gross=50
     Send 11.1 Debit    gross=50    expected_marks_count=1
     Send 11.4 Credit   gross=10    expected_marks_count=0
 
-Scenario 07.1 - Mixed Complex Flow 11.1 Debit
+TC 07.1 - Mixed Complex Flow 11.1 Debit
     [Documentation]    Το σύνθετο σενάριο με 9 βήματα (το τελευταίο είναι 11.4 πιστωτική)
     Send 8.6 Debit     gross=10        # M1
     Send 8.6 Debit     gross=30        # M2
@@ -47,7 +47,7 @@ Scenario 07.1 - Mixed Complex Flow 11.1 Debit
     Send 8.6 Credit    gross=20        # M6
     Send 11.1 Debit    gross=10    expected_marks_count=6   # connects [M1,M2,M3,M4, M5,M6]
 
-Scenario 07.2 - Mixed Complex Flow 11.4 Credit
+TC 07.2 - Mixed Complex Flow 11.4 Credit
     [Documentation]    Το σύνθετο σενάριο με 9 βήματα (το τελευταίο είναι 11.4 πιστωτική)
     Send 8.6 Debit     gross=10        # M1
     Send 8.6 Debit     gross=30        # M2
@@ -58,7 +58,7 @@ Scenario 07.2 - Mixed Complex Flow 11.4 Credit
     Send 8.6 Debit     gross=20        # M5
     Send 8.6 Credit    gross=40        # M6
     Send 11.4 Credit    gross=10    expected_marks_count=6   # connects [M1,M2,M3,M4, M5,M6]
-#Scenario 07.3 - Mixed Complex Flow 11.1 Debit
+#TC 07.3 - Mixed Complex Flow 11.1 Debit
 #    [Documentation]    Το σύνθετο σενάριο με 9 βήματα (το τελευταίο είναι 11.1)
 #    Send 8.6 Debit     gross=10        # M1
 #    Send 8.6 Debit     gross=30        # M2
@@ -69,32 +69,32 @@ Scenario 07.2 - Mixed Complex Flow 11.4 Credit
 #    Send 8.6 Debit     gross=20        # M5
 #    Send 8.6 Credit    gross=20        # M6
 #    Send 11.1 Debit    gross=10    expected_marks_count=3   # connects [M4, M5,M6]
-Scenario 08 - Split Bill
+TC 08 - Split Bill
     Send 8.6 Debit     gross=40
     Send 8.6 Debit     gross=40
     Send 11.1 Debit    gross=40    expected_marks_count=2    close_all_pending=${False}    peek=${True}
     Send 11.1 Debit    gross=40    expected_marks_count=2
 
-Scenario 09 - Partial Payment Then New Order
+TC 09 - Partial Payment Then New Order
     Send 8.6 Debit     gross=80
     Send 11.1 Debit    gross=50    expected_marks_count=1    close_all_pending=${False}    peek=${True}
     Send 8.6 Debit     gross=25
     Send 11.1 Debit    gross=55    expected_marks_count=2
 
-Scenario 10 - Mixed VAT Rates
+TC 10 - Mixed VAT Rates
     [Documentation]    Κινήσεις με διαφορετικούς συντελεστές ΦΠΑ στο ίδιο τραπέζι
     Send 8.6 Debit     gross=100   vat_rate=${13}
     Send 8.6 Debit     gross=60    vat_rate=${24}
     Send 11.1 Debit    gross=160   expected_marks_count=2    vat_rate=${13}
 
-Scenario 11 - Cancel All Before Receipt
+TC 11 - Cancel All Before Receipt
     [Documentation]    Ο πελάτης φεύγει, ακυρώνουμε όλα τα pending 8.6 πριν εκδοθεί 11.1
     Send 8.6 Debit     gross=50
     Send 8.6 Debit     gross=30
     Send 8.6 Cancel
     Pool Should Be Empty
 
-Scenario 12 - Partial Cancel Then Pay Rest
+TC 12 - Partial Cancel Then Pay Rest
     [Documentation]    Ακυρώνουμε συγκεκριμένο 8.6 (λάθος πιάτο), τα υπόλοιπα πάνε στην απόδειξη
     ${m1}=    Send 8.6 Debit     gross=40
     ${m2}=    Send 8.6 Debit     gross=25
@@ -102,14 +102,14 @@ Scenario 12 - Partial Cancel Then Pay Rest
     Send 8.6 Cancel    ${m2}
     Send 11.1 Debit    gross=75    expected_marks_count=2
 
-Scenario 13 - Cancel A Credit
+TC 13 - Cancel A Credit
     [Documentation]    Ακύρωση λανθασμένης έκπτωσης και χρέωση πλήρους ποσού
     ${m1}=    Send 8.6 Debit     gross=60
     ${m2}=    Send 8.6 Credit    gross=15
     Send 8.6 Cancel    ${m2}
     Send 11.1 Debit    gross=60    expected_marks_count=1
 
-Scenario 14 - Cancel Mixed Flow
+TC 14 - Cancel Mixed Flow
     [Documentation]    Σύνθετο: ακύρωση σε πολλαπλούς γύρους με ενδιάμεσες 11.1
     ${m1}=    Send 8.6 Debit     gross=45
     ${m2}=    Send 8.6 Debit     gross=20
@@ -120,7 +120,7 @@ Scenario 14 - Cancel Mixed Flow
     Send 8.6 Cancel
     Pool Should Be Empty
 
-Scenario 15 - Zero Value Receipt Close
+TC 15 - Zero Value Receipt Close
     [Documentation]    Balance του τραπεζιού = 0 (π.χ. comp meal, 8.6 debit = 8.6 credit).
     ...                Πρέπει να εκδοθεί 11.1 με gross=0 για να κλείσουν τα MARKs στον κόμβο.
     ...                Το vat_rate διατηρείται ίδιο με τα 8.6 (13%), ώστε VatCategoryCode=2.
@@ -129,7 +129,7 @@ Scenario 15 - Zero Value Receipt Close
     Send 11.1 Debit    gross=0     vat_rate=${13}    expected_marks_count=2
     Pool Should Be Empty
 
-Scenario 16 - Zero After Multiple Offsetting Moves
+TC 16 - Zero After Multiple Offsetting Moves
     [Documentation]    Πολλαπλές κινήσεις που ακυρώνονται μεταξύ τους. Τα 8.6 είναι 13%,
     ...                άρα το μηδενικό 11.1 πρέπει επίσης να φέρει VatCategoryCode=2.
     Send 8.6 Debit     gross=30    vat_rate=${13}
@@ -145,6 +145,7 @@ Documentation     FNB (Food & Beverage) Table Order Scenarios
 ...               11.1 receipt κλείνει τα pending 8.6 MARKs μέσω multipleConnectedMarks.
 ...               11.4 receipt είναι η retail πιστωτική (ίδιο schema με 11.1, διαφορετικός InvoiceTypeCode).
 ...               Cancel 8.6 αφαιρεί MARKs από το pool και ΔΕΝ περιλαμβάνει ποσά (αλλά Quantity=1).
+Variables         ${EXECDIR}/config/credentials.py
 Library           RequestsLibrary
 Library           Collections
 Library           OperatingSystem
@@ -162,7 +163,7 @@ ${TEMPLATE_11_1}           ${CURDIR}/Data/11.1_FNB_Retail_Sales_Receipt.json
 ${TABLE_ID}                20
 ${DEFAULT_VAT_RATE}        ${13}
 ${PRODUCT_CODE}            251320104
-${API_KEY}                 03ac2ca0-2815-41eb-894f-9d3a80c6c9da
+${API_KEY}                 %{EINVOICE_API_KEY}
 ${ISSUER_VAT}              EL154697391
 ${API_KEY_HEADER_NAME}     apikey
 @{PENDING_MARKS}

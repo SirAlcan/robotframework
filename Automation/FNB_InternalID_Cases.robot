@@ -62,7 +62,7 @@ TC 01 - Fire All With 1sec Interval
 
     Log    ✅ Case A ολοκληρώθηκε!    console=yes
 
-TC_B Fire All With 500ms Interval
+TC 02 - Fire All With 500ms Interval
     [Tags]    case_b_fire
     Generate Run Series Prefix
     Log    🚀 Ξεκινάει Case B — FAKE_IAPR_TIMEOUT    console=yes
@@ -87,7 +87,7 @@ TC_B Fire All With 500ms Interval
     Get Async Result    TC_B_02    201
 
     Log    ✅ Case B ολοκληρώθηκε!    console=yes
-TC_C Fire All With 500ms Interval
+TC 03 - Fire All With 500ms Interval
     [Tags]    case_c_fire
     Generate Run Series Prefix
     Log    🚀 Ξεκινάει Case C — FAKE_IAPR_DELAYED_TIMEOUT    console=yes
@@ -120,7 +120,7 @@ TC_C Fire All With 500ms Interval
     Get Async Result    TC_C_03    201
 
     Log    ✅ Case C ολοκληρώθηκε!    console=yes
-TC_D Fire All With 500ms Interval
+TC 04 - Fire All With 500ms Interval
     [Tags]    case_d_fire
     Generate Run Series Prefix
     Log    🚀 Ξεκινάει Case D — FAKE_IAPR_DELAYED    console=yes
@@ -153,7 +153,7 @@ TC_D Fire All With 500ms Interval
     Get Async Result    TC_D_03    201
 
     Log    ✅ Case D ολοκληρώθηκε!    console=yes
-TC_E Fire All With 500ms Interval
+TC 05 - Fire All With 500ms Interval
     [Tags]    case_e_fire
     Generate Run Series Prefix
     Log    🚀 Ξεκινάει Case E — FAKE_IAPR_VALIDATION_ERROR    console=yes
@@ -194,7 +194,7 @@ TC_E Fire All With 500ms Interval
     Get Async Result    TC_E_04    201
 
     Log    ✅ Case E ολοκληρώθηκε!    console=yes
-TC_F Fire All With 500ms Interval
+TC 06 - Fire All With 500ms Interval
     [Tags]    case_f_fire
     Generate Run Series Prefix
     Log    🚀 Ξεκινάει Case F — FAKE_ELISE_SAVE_DOCUMENT_ERROR    console=yes
@@ -219,7 +219,7 @@ TC_F Fire All With 500ms Interval
     Get Async Result    TC_F_02    201
 
     Log    ✅ Case F ολοκληρώθηκε!    console=yes
-TC_G Fire All With 500ms Interval
+TC 07 - Fire All With 500ms Interval
     [Tags]    case_g_fire
     Generate Run Series Prefix
     Log    🚀 Ξεκινάει Case G — FAKE_ELISE_SAVE_DOCUMENT_ERROR    console=yes

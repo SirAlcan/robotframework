@@ -7,10 +7,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  # --------------------------------------------------------------------------
-  # 1) Build the list of suites to run.
-  #    To add/remove a suite, edit the SUITES env var below.
-  # --------------------------------------------------------------------------
+  # ──────────────────────── 1) discover suites ────────────────────────
   discover:
     runs-on: ubuntu-latest
     outputs:
@@ -23,7 +20,6 @@ jobs:
         Automation/Receipts_InternalID_Cases.robot
     steps:
       - uses: actions/checkout@v4
-
       - id: set
         shell: bash
         run: |
@@ -33,20 +29,13 @@ jobs:
           suites = [s.strip() for s in raw if s.strip()]
           missing = [s for s in suites if not os.path.isfile(s)]
           if missing:
-              for m in missing:
-                  print(f"ERROR: Suite not found in repo: {m}", file=sys.stderr)
+              for m in missing: print(f"ERROR: Suite not found: {m}", file=sys.stderr)
               sys.exit(1)
-          out = os.environ["GITHUB_OUTPUT"]
-          with open(out, "a", encoding="utf-8") as f:
+          with open(os.environ["GITHUB_OUTPUT"], "a") as f:
               f.write("matrix=" + json.dumps({"suite": suites}) + "\n")
-          print("Suites to run:")
-          for s in suites:
-              print(f"  - {s}")
           PYEOF
 
-  # --------------------------------------------------------------------------
-  # 2) Run each suite in its own job, in parallel.
-  # --------------------------------------------------------------------------
+  # ──────────────────────── 2) run each suite ─────────────────────────
   test:
     needs: discover
     if: needs.discover.outputs.matrix != ''
@@ -56,15 +45,14 @@ jobs:
       matrix: ${{ fromJSON(needs.discover.outputs.matrix) }}
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-python@v5
-        with:
-          python-version: '3.10'
+        with: { python-version: '3.10' }
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
+
       - name: Create credentials file from secrets
         env:
           EINVOICE_API_KEY: ${{ secrets.EINVOICE_API_KEY }}
@@ -75,21 +63,19 @@ jobs:
           EINVOICE_API_KEY = "${EINVOICE_API_KEY}"
           ISSUER_VAT       = "EL154697391"
           EOF
+
       - id: slug
         shell: bash
         run: |
           slug=$(echo '${{ matrix.suite }}' | sed -E 's|^Automation/||; s|\.robot$||; s|[/ ]|_|g')
           echo "slug=$slug" >> "$GITHUB_OUTPUT"
+
       - name: Run ${{ matrix.suite }}
-        env:
-          EINVOICE_API_KEY: ${{ secrets.EINVOICE_API_KEY }}
         shell: bash
         run: |
           mkdir -p results
           robot --outputdir results \
-                --output output.xml \
-                --log log.html \
-                --report report.html \
+                --output output.xml --log log.html --report report.html \
                 "${{ matrix.suite }}"
 
       - name: Upload per-suite artifact
@@ -100,24 +86,18 @@ jobs:
           path: results/
           retention-days: 14
 
-  # --------------------------------------------------------------------------
-  # 3) Merge all per-suite outputs and send a single email report.
-  # --------------------------------------------------------------------------
+  # ──────────────────────── 3) merge + email ──────────────────────────
   report:
     needs: test
     if: always()
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-python@v5
-        with:
-          python-version: '3.10'
+        with: { python-version: '3.10' }
 
       - name: Install Robot Framework
-        run: |
-          python -m pip install --upgrade pip
-          pip install robotframework
+        run: pip install --upgrade pip robotframework
 
       - name: Download all per-suite artifacts
         uses: actions/download-artifact@v4
@@ -127,270 +107,36 @@ jobs:
           merge-multiple: false
 
       - name: Merge results with rebot
-        id: merge
         shell: bash
         run: |
           mkdir -p combined
           python3 - <<'PYEOF'
-          import glob, os, subprocess, sys
+          import glob, subprocess, sys
           outputs = sorted(glob.glob("artifacts/**/output.xml", recursive=True))
           if not outputs:
-              print("No output.xml files found. Skipping merge.")
-              with open(os.environ["GITHUB_OUTPUT"], "a") as f:
-                  f.write("merged=false\n")
+              print("No output.xml files found.")
               sys.exit(0)
-          print(f"Merging {len(outputs)} suite output(s):")
-          for o in outputs:
-              print(f"  - {o}")
-          rc = subprocess.call([
-              "rebot",
-              "--name", "API Regression Suite",
+          subprocess.call([
+              "rebot", "--name", "API Regression Suite",
               "--outputdir", "combined",
-              "--output", "output.xml",
-              "--log", "log.html",
-              "--report", "report.html",
+              "--output", "output.xml", "--log", "log.html", "--report", "report.html",
               *outputs,
           ])
-          # rebot returns the number of failed tests; merge itself succeeded.
-          with open(os.environ["GITHUB_OUTPUT"], "a") as f:
-              f.write("merged=true\n")
-          print(f"rebot exit code: {rc}")
           PYEOF
 
+      # ⬇ ΝΕΟ STEP — ένα single line αντί για 200 γραμμές inline Python ⬇
+      - name: Build HTML email body
+        if: always()
+        run: python3 scripts/build_email_html.py combined/output.xml email_body.html
+
       - name: Upload combined report
-        if: steps.merge.outputs.merged == 'true'
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: api-combined-report
-          path: combined/
-
-      - name: Build email body
-        if: always()
-        shell: bash
-        run: |
-          python3 - <<'PYEOF'
-          import json, os, re
-          import xml.etree.ElementTree as ET
-
-          OUT_XML    = 'combined/output.xml'
-          EMAIL_FILE = 'email_body.txt'
-          repo       = os.environ.get('GITHUB_REPOSITORY', '')
-          run_id     = os.environ.get('GITHUB_RUN_ID', '')
-          run_url    = f"https://github.com/{repo}/actions/runs/{run_id}"
-
-          WIDTH  = 78
-          NAME_W = 50
-
-          def write(text):
-              with open(EMAIL_FILE, 'w', encoding='utf-8') as f:
-                  f.write(text)
-
-          if not os.path.exists(OUT_XML):
-              write(
-                  "API REGRESSION TEST REPORT\n" + "=" * WIDTH + "\n\n"
-                  "  No combined output.xml produced.\n"
-                  "  All suites probably failed before producing results.\n\n"
-                  f"  Run URL: {run_url}\n"
-              )
-              raise SystemExit(0)
-
-          tree = ET.parse(OUT_XML)
-          root = tree.getroot()
-          stats = root.find('.//total/stat')
-          total_pass = int(stats.get('pass', 0))
-          total_fail = int(stats.get('fail', 0))
-          total_skip = int(stats.get('skip', 0))
-          total      = total_pass + total_fail + total_skip
-          pass_pct   = round(100 * total_pass / total) if total else 0
-
-          root_status = root.find('suite/status')
-          if root_status is not None:
-              t_secs = float(root_status.get('elapsed', 0))
-              tm, ts = divmod(t_secs, 60)
-              total_dur = f"{int(tm)}m{int(ts):02d}s" if tm else f"{ts:.1f}s"
-          else:
-              total_dur = "—"
-
-          # ── parsing helpers ────────────────────────────────────────────────
-          KV_RE      = re.compile(r'^([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*)$')
-          BODY_RE    = re.compile(r'(\{.*\})', re.DOTALL)
-          MESSAGE_RE = re.compile(r'"message"\s*:\s*"([^"]*)"')
-          STEP_SPLIT_RE = re.compile(r'(?:^|\n)\s*\d+\)\s+', re.MULTILINE)
-
-          def extract_api_message(text):
-              if not text:
-                  return ''
-              for body_match in BODY_RE.finditer(text):
-                  body = body_match.group(1)
-                  try:
-                      data = json.loads(body)
-                      if isinstance(data, dict):
-                          if data.get('message'):
-                              return str(data['message'])
-                          if data.get('error'):
-                              return str(data['error'])
-                  except Exception:
-                      m = MESSAGE_RE.search(body)
-                      if m:
-                          return m.group(1)
-              m = re.search(r'msg\s*=\s*"([^"]+)"', text)
-              return m.group(1) if m else ''
-
-          def parse_step(text):
-              text = (text or '').strip()
-              text = re.sub(r':\s*\d+\s*!=\s*\d+\s*$', '', text)
-              api_msg = extract_api_message(text)
-              cleaned = BODY_RE.sub('<JSON body>', text)
-              parts = [p.strip() for p in cleaned.split('|')]
-              summary = parts[0] if parts else ''
-              fields = {}
-              for p in parts[1:]:
-                  m = KV_RE.match(p)
-                  if m:
-                      v = m.group(2).strip()
-                      if v.startswith('"') and v.endswith('"'):
-                          v = v[1:-1]
-                      fields[m.group(1)] = v
-              if api_msg:
-                  fields['message'] = api_msg
-              return {'summary': summary, 'fields': fields}
-
-          def split_into_steps(raw):
-              if not raw:
-                  return []
-              raw = raw.strip()
-              if raw.startswith('Several failures occurred:'):
-                  raw = raw[len('Several failures occurred:'):].strip()
-                  parts = STEP_SPLIT_RE.split(raw)
-                  return [p.strip() for p in parts if p.strip()]
-              return [raw]
-
-          def render_parsed(out, parsed, indent=6):
-              pad = ' ' * indent
-              if parsed['summary']:
-                  out.append(f"{pad}Summary : {parsed['summary'][:WIDTH-indent-12]}")
-              if parsed['fields']:
-                  preferred = ['expected', 'got', 'success', 'message',
-                               'msg', 'mark', 'uid', 'erp', 'series',
-                               'internalDocumentId', 'status']
-                  seen = set()
-                  for key in preferred:
-                      if key in parsed['fields']:
-                          val = parsed['fields'][key]
-                          out.append(f"{pad}{key:<8}: {val[:WIDTH-indent-12]}")
-                          seen.add(key)
-                  for key, val in parsed['fields'].items():
-                      if key not in seen:
-                          out.append(f"{pad}{key:<8}: {val[:WIDTH-indent-12]}")
-              if not parsed['summary'] and not parsed['fields']:
-                  out.append(f"{pad}(no parseable details — empty assertion)")
-
-          # ── collect leaf suites ────────────────────────────────────────────
-          suites = []
-          for suite in root.iter('suite'):
-              tests = suite.findall('test')
-              if tests:
-                  suites.append((suite.get('name') or '(unnamed)', tests))
-
-          EQ  = '=' * WIDTH
-          DIV = '-' * WIDTH
-          out = []
-
-          # Header
-          status_word = 'ALL TESTS PASSED' if total_fail == 0 else f'{total_fail} TEST(S) FAILED'
-          out += [
-              EQ,
-              ' API REGRESSION TEST REPORT'.center(WIDTH),
-              EQ,
-              '',
-              f"  Result    : {status_word}",
-              f"  Pass rate : {total_pass} / {total}  ({pass_pct}%)",
-              f"  Failed    : {total_fail}",
-              f"  Skipped   : {total_skip}",
-              f"  Duration  : {total_dur}",
-              f"  Run URL   : {run_url}",
-              '',
-          ]
-
-          # Suite summary
-          out += [EQ, ' SUITE SUMMARY', EQ, '']
-          out.append(f"  {'Status':<6} {'Suite':<{NAME_W}} {'Pass':>5} {'Fail':>5} {'Skip':>5}")
-          out.append(f"  {'-'*6} {'-'*NAME_W} {'-'*5} {'-'*5} {'-'*5}")
-          for name, tests in suites:
-              p  = sum(1 for t in tests if t.find('status').get('status') == 'PASS')
-              f_ = sum(1 for t in tests if t.find('status').get('status') == 'FAIL')
-              s  = sum(1 for t in tests if t.find('status').get('status') not in ('PASS', 'FAIL'))
-              tag = '[OK]  ' if f_ == 0 else '[FAIL]'
-              short = name if len(name) <= NAME_W else name[:NAME_W - 1] + '…'
-              out.append(f"  {tag} {short:<{NAME_W}} {p:>5} {f_:>5} {s:>5}")
-          out.append(f"  {'-'*6} {'-'*NAME_W} {'-'*5} {'-'*5} {'-'*5}")
-          out.append(f"  {'TOTAL':<6} {'':<{NAME_W}} {total_pass:>5} {total_fail:>5} {total_skip:>5}")
-          out += ['']
-
-          # Failures
-          failing_suites = [(n, ts) for n, ts in suites
-                            if any(t.find('status').get('status') == 'FAIL' for t in ts)]
-          if failing_suites:
-              out += [EQ, f' FAILURES ({total_fail} test(s))', EQ]
-              fail_idx = 0
-              for suite_name, tests in failing_suites:
-                  out += ['', f"  ── {suite_name} " + '─' * max(0, WIDTH - 6 - len(suite_name))]
-                  for t in tests:
-                      st = t.find('status')
-                      if st.get('status') != 'FAIL':
-                          continue
-                      fail_idx += 1
-                      raw = (st.text or '').strip() or (st.get('message') or '').strip()
-                      elapsed = float(st.get('elapsed', 0))
-                      step_strings = split_into_steps(raw)
-
-                      out += ['', f"  [{fail_idx}] {t.get('name')}  ({elapsed:.2f}s)"]
-
-                      if len(step_strings) <= 1:
-                          parsed = parse_step(step_strings[0]) if step_strings \
-                                   else {'summary': raw, 'fields': {}}
-                          render_parsed(out, parsed, indent=6)
-                      else:
-                          out.append(f"      {len(step_strings)} failing step(s):")
-                          for n, step in enumerate(step_strings, 1):
-                              parsed = parse_step(step)
-                              out.append('')
-                              out.append(f"      Step {n}:")
-                              render_parsed(out, parsed, indent=8)
-              out += ['']
-
-          # Per-suite detailed listing
-          out += [EQ, ' DETAILED RESULTS PER SUITE', EQ]
-          for suite_name, tests in suites:
-              passes = [t for t in tests if t.find('status').get('status') == 'PASS']
-              fails  = [t for t in tests if t.find('status').get('status') == 'FAIL']
-              skips  = [t for t in tests if t.find('status').get('status') not in ('PASS', 'FAIL')]
-              status_word = 'ALL PASSING' if not fails else f'{len(fails)} FAILED'
-              out += ['', DIV, f" {suite_name}  [{status_word}]", DIV]
-              if passes:
-                  out.append(f"  Passed ({len(passes)}):")
-                  for t in passes:
-                      el = float(t.find('status').get('elapsed', 0))
-                      out.append(f"    +  {t.get('name'):<{NAME_W}}  ({el:.2f}s)")
-              if fails:
-                  out.append(f"  Failed ({len(fails)}):")
-                  for t in fails:
-                      el  = float(t.find('status').get('elapsed', 0))
-                      raw = (t.find('status').text or '').strip()
-                      step_strings = split_into_steps(raw)
-                      first = parse_step(step_strings[0]) if step_strings else {'fields': {}}
-                      api_msg = first['fields'].get('message', '') or first['fields'].get('msg', '')
-                      tail = f"  → {api_msg[:120]}" if api_msg else ''
-                      multi = f" [{len(step_strings)} steps]" if len(step_strings) > 1 else ''
-                      out.append(f"    -  {t.get('name'):<{NAME_W}}  ({el:.2f}s){multi}{tail}")
-              if skips:
-                  out.append(f"  Skipped ({len(skips)}):")
-                  for t in skips:
-                      out.append(f"    ~  {t.get('name')}")
-
-          out += ['', EQ, '']
-          write('\n'.join(out))
-          PYEOF
+          path: |
+            combined/
+            email_body.html
 
       - name: Send Email Report
         if: always()
@@ -402,6 +148,6 @@ jobs:
           password: ${{ secrets.EMAIL_PASSWORD }}
           to: gkazakou@impact.gr
           from: GitHub Actions <${{ secrets.EMAIL_USERNAME }}>
-          subject: "API Regression Test Report - ${{ needs.test.result }}"
-          body: file://email_body.txt
+          subject: "API Regression Test Report — ${{ needs.test.result }}"
+          html_body: file://email_body.html       # ⬅ ΑΛΛΑΓΗ: html_body αντί για body
           attachments: combined/output.xml, combined/log.html, combined/report.html

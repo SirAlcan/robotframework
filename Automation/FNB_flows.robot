@@ -145,12 +145,13 @@ Documentation     FNB (Food & Beverage) Table Order Scenarios
 ...               11.1 receipt κλείνει τα pending 8.6 MARKs μέσω multipleConnectedMarks.
 ...               11.4 receipt είναι η retail πιστωτική (ίδιο schema με 11.1, διαφορετικός InvoiceTypeCode).
 ...               Cancel 8.6 αφαιρεί MARKs από το pool και ΔΕΝ περιλαμβάνει ποσά (αλλά Quantity=1).
-Variables         ${EXECDIR}/config/credentials.py
+
 Library           RequestsLibrary
 Library           Collections
 Library           OperatingSystem
 Library           DateTime
 Library           String
+Variables         ${EXECDIR}/config/credentials.py
 Suite Setup       Setup Suite
 Test Setup        Reset Pending Marks Pool
 

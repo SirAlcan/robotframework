@@ -1,6 +1,6 @@
 *** Test Cases ***
 TC 01 - Fire All With 1sec Interval
-    [Tags]    case_a_fire
+    [Tags]             uniqueness    case_A
     Generate Run Series Prefix
     Log    🚀 Ξεκινάει Case A — 1sec interval μεταξύ requests    console=yes
     Log    🔑 Run Prefix: ${RUN_PREFIX}    console=yes

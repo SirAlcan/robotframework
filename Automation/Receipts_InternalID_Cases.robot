@@ -25,7 +25,7 @@ TC 02 - FAKE IAPR Delayed Timeout Then Success On Same UID
     Send And Verify    A    ${num}    1    v1    ${ERP_FAKE_TIMEOUT}    408
     Send And Verify    A    ${num}    2    v1    ${ERP_NONE}            201
 
-TC 03 - Delayed Timeout, Different Series Succeeds, Same Series Retry Succeeds
+TC 03 - Delayed Timeout, Different Series Succeeds, Same Series Retry Succeeds    #check portal
     [Tags]             fake_delayed_timeout    case_C
     ${num}=    Case Base Number    C
     Send And Verify    A    ${num}    1    v1    ${ERP_FAKE_TIMEOUT}            408

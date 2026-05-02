@@ -134,7 +134,7 @@ TC 04 - Fire All With 500ms Interval
     # TC_D_03 → Series A, Id 2, v2 → 201 (νέο InternalId)
     ${p3}=    Build Payload    v2    D    A    1    number=999001
 
-    ${proc1}=    Fire Request Async    ${p1}    FAKE_IAPR_DELAYED    TC_D_01
+    ${proc1}=    Fire Request Async    ${p1}    FAKE_IAPR_TIMEOUT    TC_D_01
     Sleep    500ms
 
     ${proc2}=    Fire Request Async    ${p2}    FAKE_IAPR_DELAYED_TIMEOUT    TC_D_02
@@ -197,7 +197,7 @@ TC 05 - Fire All With 500ms Interval
 TC 06 - Fire All With 500ms Interval
     [Tags]    case_f_fire
     Generate Run Series Prefix
-    Log    🚀 Ξεκινάει Case F — FAKE_ELISE_SAVE_DOCUMENT_ERROR    console=yes
+    Log    🚀 Ξεκινάει Case F — FAKE_IAPR_VALIDATION_ERROR   console=yes
 
     # TC_F_01 → Series A, Id 1, v1 → 500 Elise Error
     ${p1}=    Build Payload    v1    F    A    1    number=999001
@@ -205,7 +205,7 @@ TC 06 - Fire All With 500ms Interval
     # TC_F_02 → Series A, Id 2, v1 → 201 (μετά το error)
     ${p2}=    Build Payload    v1    F    A    2    number=999001
 
-    ${proc1}=    Fire Request Async    ${p1}    FAKE_ELISE_SAVE_DOCUMENT_ERROR    TC_F_01
+    ${proc1}=    Fire Request Async    ${p1}    FAKE_IAPR_VALIDATION_ERROR    TC_F_01
     Sleep    500ms
 
     ${proc2}=    Fire Request Async    ${p2}    NONE    TC_F_02
@@ -215,7 +215,7 @@ TC 06 - Fire All With 500ms Interval
     Evaluate    $proc2.wait()
 
     Log    📊 Αποτελέσματα:    console=yes
-    Get Async Result    TC_F_01    500    Could not accept document. Please resend.
+    Get Async Result    TC_F_01    400
     Get Async Result    TC_F_02    201
 
     Log    ✅ Case F ολοκληρώθηκε!    console=yes
@@ -237,7 +237,7 @@ TC 07 - Fire All With 500ms Interval
     Sleep    500ms
 
     ${proc2}=    Fire Request Async    ${p2}    NONE    TC_G_02
-    Sleep    500ms
+    Sleep    120s
 
     ${proc3}=    Fire Request Async    ${p3}    NONE    TC_G_03
 

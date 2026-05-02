@@ -164,7 +164,7 @@ ${TEMPLATE_11_1}           ${CURDIR}/Data/11.1_FNB_Retail_Sales_Receipt.json
 ${TABLE_ID}                20
 ${DEFAULT_VAT_RATE}        ${13}
 ${PRODUCT_CODE}            251320104
-${API_KEY}                 %{EINVOICE_API_KEY}
+${API_KEY}                 ${EINVOICE_API_KEY}
 ${ISSUER_VAT}              EL154697391
 ${API_KEY_HEADER_NAME}     apikey
 @{PENDING_MARKS}
@@ -180,25 +180,15 @@ ${TPL_11_1}                ${EMPTY}
 # ======================================================================
 
 Setup Suite
-    Load Credentials From Env
     Load Base Templates
     Initialize Document Counter
-    ${auth_value}=        Set Variable           ${API_KEY}
     ${headers}=           Create Dictionary
     ...    Content-Type=application/json
     ...    Accept=application/json
-    ...    ${API_KEY_HEADER_NAME}=${auth_value}
-    Create Session     fnb    ${BASE_URL}    headers=${headers}
-    Log                   Session created with ${API_KEY_HEADER_NAME} header    level=DEBUG
+    ...    apikey=${API_KEY}
+    Create Session        fnb    ${BASE_URL}    headers=${headers}
+    Log                   Session created    level=DEBUG
 
-Load Credentials From Env
-    [Documentation]       Διαβάζει API_KEY και ISSUER_VAT από env vars αν υπάρχουν,
-    ...                   αλλιώς κρατάει τις default τιμές από το *** Variables *** section.
-    ${env_api_key}=       Get Environment Variable    FNB_API_KEY       default=${API_KEY}
-    Set Suite Variable    ${API_KEY}             ${env_api_key}
-    ${env_issuer_vat}=    Get Environment Variable    FNB_ISSUER_VAT    default=${ISSUER_VAT}
-    Set Suite Variable    ${ISSUER_VAT}          ${env_issuer_vat}
-    Log                   Credentials loaded (issuer VAT: ${ISSUER_VAT})    level=DEBUG
 
 Load Base Templates
     ${tpl_8_6}=           Load JSON File         ${TEMPLATE_8_6}

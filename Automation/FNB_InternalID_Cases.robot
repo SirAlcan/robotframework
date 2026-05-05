@@ -105,7 +105,7 @@ TC 03 - Fire All With 500ms Interval
     Sleep    500ms
 
     ${proc2}=    Fire Request Async    ${p2}    NONE    TC_C_02
-    Sleep    500ms
+    Sleep    120s
 
     ${proc3}=    Fire Request Async    ${p3}    NONE    TC_C_03
 
@@ -132,13 +132,13 @@ TC 04 - Fire All With 500ms Interval
     ${p2}=    Build Payload    v2    D    A    1    number=999001
 
     # TC_D_03 → Series A, Id 2, v2 → 201 (νέο InternalId)
-    ${p3}=    Build Payload    v2    D    A    1    number=999001
+    ${p3}=    Build Payload    v2    D    A    2    number=999001
 
     ${proc1}=    Fire Request Async    ${p1}    FAKE_IAPR_TIMEOUT    TC_D_01
     Sleep    500ms
 
     ${proc2}=    Fire Request Async    ${p2}    FAKE_IAPR_DELAYED_TIMEOUT    TC_D_02
-    Sleep    500ms
+    Sleep    120s
 
     ${proc3}=    Fire Request Async    ${p3}    NONE    TC_D_03
 

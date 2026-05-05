@@ -34,7 +34,7 @@
     "CounterParty": {
         "RegisteredName": "RETAIL CUSTOMER",
         "code": "0000065",
-        "Vat": "",
+        "Vat": "135952929",
         "Address": {
             "CountryCode": "GR",
             "Municipality": null,

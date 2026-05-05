@@ -23,6 +23,9 @@ ${USERNAME_FIELD}    id=emailInput
 ${PASSWORD_FIELD}    name=LoginInput.Password
 ${LOGIN_BUTTON}      id=loginButton
 ${LOGIN_URL}    https://hotdoc.impact.gr/auth/login
+${newCompanyName}      LMC Demo
+${expectedAadeUser}    LMCNEW2025
+${BASE_URL}             https://hotdoc.impact.gr
 
 *** Keywords ***
 # ======================================
@@ -170,7 +173,55 @@ Add Admin User
     # Επαλήθευση ότι ο χρήστης εμφανίζεται στη λίστα με ρόλο Διαχειριστής
     Wait Until Element Is Visible    xpath=//span[contains(text(), '${name}')]    timeout=10s
     Wait Until Element Is Visible    xpath=//span[@data-slot='badge' and contains(., 'Διαχειριστής')]    timeout=5s
+# ======================================
+# ----------- CHANGE COMPANY -----------
+# ======================================
 
+Change Company
+    [Documentation]    Αλλάζει την επιλεγμένη εταιρεία μέσω του sidebar dropdown
+    [Arguments]    ${company_name}=${newCompanyName}
+
+    # 1. Άνοιγμα του dropdown επιλογής εταιρείας στο sidebar
+    Safe Click    xpath=//button[@data-slot='dropdown-menu-trigger' and @data-sidebar='menu-button']
+
+    # 2. Περιμένουμε το menu content να γίνει visible (κρίσιμο για stability)
+    Wait Until Element Is Visible
+    ...    xpath=//div[@data-slot='dropdown-menu-content' and @data-state='open']
+    ...    timeout=10s
+
+    # 3. Επιλογή της εταιρείας — ψάχνουμε ΜΟΝΟ τα text nodes του menuitem
+    #    ώστε να αγνοήσουμε το avatar div με τα αρχικά (π.χ. "LD", "ΠΑ")
+    Safe Click
+    ...    xpath=//div[@data-slot='dropdown-menu-content' and @data-state='open']//div[@role='menuitem' and normalize-space(text()[normalize-space()])='${company_name}']
+
+    # 4. Επαλήθευση toast μηνύματος
+    Wait Until Element Is Visible
+    ...    xpath=//li[@data-sonner-toast]//div[@data-title and contains(., 'Η εταιρεία ${company_name} επιλέχθηκε')]
+    ...    timeout=10s
+
+Validate Company Changed
+    [Documentation]    Επαληθεύει ότι η αλλαγή εταιρείας ολοκληρώθηκε σωστά
+    [Arguments]    ${company_name}=${newCompanyName}    ${aade_user}=${expectedAadeUser}
+
+    # 1. Πλοήγηση στη Διαχείριση Εταιρείας
+    Safe Click    xpath=//a[@data-slot='sidebar-menu-sub-button' and @href='/company/manage']
+    Wait Until Location Is    ${BASE_URL}/company/manage    10s
+
+    # 2. Έλεγχος aadeUsername
+    Safe Wait Element    xpath=//input[@name='aadeUsername']
+    Wait Until Keyword Succeeds    5x    1s    Validate Aade Username    ${aade_user}
+
+    # 3. Έλεγχος ονόματος εταιρείας στο sidebar
+    Wait Until Element Is Visible
+    ...    xpath=(//span[@class='truncate font-medium' and normalize-space(.)='${company_name}'])[1]
+    ...    timeout=10s
+
+Validate Aade Username
+    [Documentation]    Helper για επαλήθευση του aadeUsername input value
+    [Arguments]    ${expected_value}
+    ${actual_value}=    Get Element Attribute    xpath=//input[@name='aadeUsername']    value
+    Should Be Equal As Strings    ${actual_value}    ${expected_value}
+    ...    msg=Expected aadeUsername to be '${expected_value}' but found '${actual_value}'
 *** Test Cases ***
 TC 01 - Login Success
     Valid Login Test    ${userEmail1}    ${pwd1}
@@ -182,3 +233,6 @@ TC 03 - Delete And Recreate Admin User
     Navigate To User Management
     Delete User    ${newUserName}
     Add Admin User    ${newUserName}    ${newUserEmail}
+TC 04 - Change Company
+    Change Company    ${newCompanyName}
+    Validate Company Changed    ${newCompanyName}    ${expectedAadeUser}
